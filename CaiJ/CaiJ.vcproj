@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="F:\boost_1_62_0"
+				AdditionalIncludeDirectories="E:\boost_1_51_0\boost_1_51_0"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -69,7 +69,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\regex&quot;"
+				AdditionalLibraryDirectories="E:\boost_1_51_0\boost_1_51_0\stage\lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -196,7 +196,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Helper.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\HttpClient.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Query.cpp"
 				>
 			</File>
 			<File
@@ -219,6 +227,10 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\Url.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Í·ÎÄ¼þ"
@@ -234,7 +246,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Helper.h"
+				>
+			</File>
+			<File
 				RelativePath=".\HttpClient.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Query.h"
 				>
 			</File>
 			<File
@@ -247,6 +267,10 @@
 			</File>
 			<File
 				RelativePath=".\targetver.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Url.h"
 				>
 			</File>
 		</Filter>
@@ -269,7 +293,15 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath=".\ClassDiagram1.cd"
+			>
+		</File>
+		<File
 			RelativePath=".\ReadMe.txt"
+			>
+		</File>
+		<File
+			RelativePath=".\urls.xml"
 			>
 		</File>
 	</Files>

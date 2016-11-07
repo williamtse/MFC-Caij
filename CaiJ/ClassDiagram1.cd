@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="CAboutDlg" Collapsed="true">
+    <Position X="3" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAABAAhBAAAAAAAAAAAAAAQAAAAAAAAA=</HashCode>
+      <FileName>CaiJDlg.cpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CCaiJApp" Collapsed="true">
+    <Position X="4.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAgBAAAAAAAAAAAQAAAAAAAAIAAA=</HashCode>
+      <FileName>CaiJ.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CCaiJDlg" Collapsed="true">
+    <Position X="3" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EACAAAEAAAAAAAAAQhBAAAAABAABAYQAAAUAAEAQAAA=</HashCode>
+      <FileName>CaiJDlg.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HttpClient" Collapsed="true">
+    <Position X="4.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAACAAAAABAAAQBAAIACAAAAAAAAAEAQAAAAAA=</HashCode>
+      <FileName>HttpClient.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="__unnamed_00bc_1" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAABAAAAAAAAAAABAAAAAACIAAMAAAAAAgEAAAAAAA=</HashCode>
+      <FileName>CaiJDlg.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Typedef Name="CaijiTask" Collapsed="true">
+    <Position X="0.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>CaiJDlg.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Font Name="微软雅黑" Size="9" />
+</ClassDiagram>

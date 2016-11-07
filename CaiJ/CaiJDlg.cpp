@@ -5,8 +5,8 @@
 #include "CaiJ.h"
 #include "CaiJDlg.h"
 #include "HttpClient.h"
+#include "Query.h"
 
-#include <boost/regex.hpp>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -186,9 +186,7 @@ void Wchar_tToString(std::string& szDst, wchar_t *wchar)
 	delete []psText;// psText的清除
 }
 
-CString GenerateUrl(CString stype,CString script,CString rtype,CString pageNum){
 
-}
 
 UINT   CaijiThreadFunction(LPVOID pParam){
 	CaijiTask *ctj = (CaijiTask *)pParam;
@@ -199,39 +197,17 @@ UINT   CaijiThreadFunction(LPVOID pParam){
 	while(1){
 		if(t==0){
 			CString html = hc->GetHttpCode(ctj->url,METHOD_GET,NULL);
-			ctj->clog->SetWindowText(L"采集成功");
-			//CString test = L"g('aaa','bbbb','ccc');";
-			std::string htmlstr= (CStringA)html;
-			boost::regex expression1("t_page=(\d*);");
-			boost::smatch page;
-			std::string::const_iterator start1 = htmlstr.begin();  
-			std::string::const_iterator end1 = htmlstr.end();
-			int pageNum=1;
-			while(boost::regex_search(start1, end1, page, expression1)){
-				pageNum = atoi(page[0].str().c_str());
+			Query qr = new Query();
+			int pageNum = qr->getPageNum(html);
+			if(pageNum>1){
+				while(pageNum>0){
+					CString pageNumStr;
+					pageNumStr.Format(L"%d",pageNum);
+					html+=hc->GetHttpCode(ctj->url+L"&page_no="+pageNumStr,METHOD_GET,NULL);
+				}
 			}
-			CString pageNumStr;
-			pageNumStr.Format(L"%d",pageNum);
-			ctj->clist->SetItemText(ctj->row,2,pageNumStr);
-			if(pageNum>0){
-				//htmlstr = "g(aaa);\ng(bbb);\ng(ccc);";
-				boost::regex expression2("g\\(([^\n]*)\\);");  
-				boost::smatch what;  
-				std::string::const_iterator start2 = htmlstr.begin();  
-				std::string::const_iterator end2 = htmlstr.end(); 
-				int mc = 0;
-				while ( boost::regex_search(start2, end2, what, expression2) )  
-				{  
-					mc++;
-					CString matchstr;
-					//matchstr.Format(L"%s",what[0].str().c_str());
-					matchstr = CA2T(what[0].str().c_str());
-					ctj->cresult->AddString(matchstr);
-					start2 = what[0].second;
-					matchCount.Format(_T("%d"),mc);
-					ctj->clist->SetItemText(ctj->row,3,matchCount);
-				}  
-			}
+
+			
 			ctj->clog->SetWindowText(L"is match");
 			t=ctj->flush;
 		}
