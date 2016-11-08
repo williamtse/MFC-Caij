@@ -35,8 +35,10 @@ public:
 	CString m_uid;
 	afx_msg void OnBnClickedButtonStart();
 	CString m_log;
-	CEdit c_log;
-	CListBox c_result;
+protected:
+	virtual void OnOK();
+public:
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 };
 
 

@@ -47,6 +47,8 @@ BOOL CCaiJApp::InitInstance()
 
 	CWinApp::InitInstance();
 
+	
+
 	AfxEnableControlContainer();
 
 	// 标准初始化

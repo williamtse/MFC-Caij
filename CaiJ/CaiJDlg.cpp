@@ -73,9 +73,6 @@ void CCaiJDlg::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_LIST1, m_list);
 	DDX_Text(pDX, IDC_EDIT_UID, m_uid);
-	DDX_Text(pDX, IDC_LOG, m_log);
-	DDX_Control(pDX, IDC_LOG, c_log);
-	DDX_Control(pDX, IDC_LIST2, c_result);
 }
 
 BEGIN_MESSAGE_MAP(CCaiJDlg, CDialog)
@@ -118,13 +115,16 @@ BOOL CCaiJDlg::OnInitDialog()
 
 	// TODO: 在此添加额外的初始化代码
 	m_list.InsertColumn( 0, L"名称", LVCFMT_LEFT, 110 );// 插入列 
-    m_list.InsertColumn( 1, L"URL", LVCFMT_LEFT, 250 );
+    m_list.InsertColumn( 1, L"URL", LVCFMT_LEFT, 790 );
 	m_list.InsertColumn( 2, L"页数", LVCFMT_LEFT,50);
 	m_list.InsertColumn( 3, L"数量", LVCFMT_LEFT, 50 );
 	m_list.InsertColumn( 4, L"刷新", LVCFMT_LEFT, 50 );
 
 	m_uid = L"i4kjc7jfm15965600l4785579";
 	UpdateData(FALSE);
+
+	
+
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -211,8 +211,7 @@ UINT   CaijiThreadFunction(LPVOID pParam){
 			CString pageNumStr;
 			pageNumStr.Format(L"%d",pageNum);
 			ctj->clist->SetItemText(ctj->row,2,pageNumStr);
-			
-			ctj->clog->SetWindowText(L"is match");
+
 			t=ctj->flush;
 		}
 		Sleep(1000);
@@ -222,41 +221,152 @@ UINT   CaijiThreadFunction(LPVOID pParam){
 	}
 	return 0;
 };
+
+
+int getSTYPE(CString stype){
+	int STYPE=0;
+	if(stype==L"FT"){
+		STYPE=STYPE_FT;
+	}
+	if(stype==L"BK"){
+		STYPE=STYPE_BK;
+	}
+	if(stype==L"BS"){
+		STYPE=STYPE_BS;
+	}
+	if(stype==L"TN"){
+		STYPE=STYPE_TN;
+	}
+	if(stype==L"BM"){
+		STYPE=STYPE_BM;
+	}
+	if(stype==L"TT"){
+		STYPE=STYPE_TT;
+	}
+	if(stype==L"OP"){
+		STYPE=STYPE_OP;
+	}
+	if(stype==L"BV"){
+		STYPE=STYPE_BV;
+	}
+	return STYPE;
+}
+
 //开始采集
 void CCaiJDlg::OnBnClickedButtonStart()
 {
 	GetDlgItem(IDC_BUTTON_START)->EnableWindow(FALSE);
 	UpdateData(TRUE);
 	CString cuid = m_uid;
-	
-	URLPARAMS *urlParams = new URLPARAMS;
-	urlParams->is_future = FALSE;
-	urlParams->pageNum = 0;
-	urlParams->rtype = L"r";
-	urlParams->type = TYPE_BODY_VAR;
-	urlParams->sport = STYPE_FT;
-	urlParams->stype = L"FT";
-	urlParams->uid = cuid;
-	
-	Url url = new Url((LPVOID)urlParams);
-	CString urlstr = url.GenerateUrl();
 
-	CAIJI_TASK *cjt = new CAIJI_TASK;
-	cjt->name= L"足球-赛事-让球";
-	cjt->url=urlstr;
-	cjt->count=0;
-	cjt->flush=20;
-	cjt->clog = &c_log;
-	cjt->cresult = &c_result;
+	//初始化COM
+	CoInitialize(NULL);
+	//读取XML
+	CComPtr<IXMLDOMDocument> spDoc; //DOM
+	spDoc.CoCreateInstance(CLSID_DOMDocument);//创建文档对象
+	VARIANT_BOOL vb;
+	spDoc->load(CComVariant(OLESTR("urls.xml")), &vb); //加载XML文件
+	CComPtr<IXMLDOMElement> spRootEle;
+	spDoc->get_documentElement(&spRootEle); //根节点
+	CComPtr<IXMLDOMNodeList> spNodeList;
+	spRootEle->get_childNodes(&spNodeList); //子节点列表
+	long nLen;
+	spNodeList->get_length(&nLen); //子节点数
+
 	
-	int row=m_list.InsertItem(0,cjt->name); //用insertitem ,返回行数
-	m_list.SetItemText(0,1,cjt->url);
-	CString count,flush;
-	count.Format(_T("%d"), cjt->count);
-	flush.Format(_T("%d"), cjt->flush);
-	m_list.SetItemText(0,2,count);
-	m_list.SetItemText(0,3,flush);
-	cjt->clist = &m_list;
-	cjt->row = row;
-	CWinThread* mythread = AfxBeginThread(CaijiThreadFunction,(LPVOID)cjt); 
+	for (long i = 0; i < nLen; ++i) //遍历子节点
+	{
+		URLPARAMS *urlParams = new URLPARAMS;
+		CAIJI_TASK *cjt = new CAIJI_TASK;//采集任务结构体
+		CComPtr<IXMLDOMNode> spNode;
+		spNodeList->get_item(i, &spNode);
+		CComPtr<IXMLDOMNodeList> spUrlParamList;
+		spNode->get_childNodes(&spUrlParamList);
+		long pLen;
+		spUrlParamList->get_length(&pLen);
+
+		//获取URL的参数
+		for(long j=0;j<pLen;++j)
+		{
+			CComPtr<IXMLDOMNode> spParamNode;
+			spUrlParamList->get_item(j,&spParamNode);
+			CComBSTR value;
+			spParamNode->get_nodeName(&value);//URL参数节点的标签名
+			
+			CString strValue = CString(value);
+			if(strValue==L"TYPE"){
+				spParamNode->get_text(&value);
+				CString _type =  CString(value);
+				if(_type==L"game" || _type==L"gun"||_type==L"future")
+				{
+					urlParams->type = TYPE_BODY_VAR;
+				}
+			}else if(strValue == L"STYPE"){
+				spParamNode->get_text(&value);
+				CString _stype = CString(value);
+				urlParams->stype = _stype;
+				int STYPE = getSTYPE(_stype);
+				urlParams->sport = STYPE;
+			}else if(strValue == L"RTYPE"){
+				spParamNode->get_text(&value);
+				CString _rtype = CString(value);
+				urlParams->rtype = _rtype;
+			}else if(strValue == L"NAME"){
+				spParamNode->get_text(&value);
+				CString _name = CString(value);
+				cjt->name = _name;
+			}else if(strValue == L"FUTURE"){
+				spParamNode->get_text(&value);
+				CString _FUTURE = CString(value);
+				urlParams->is_future = _FUTURE==L"Y"?TRUE:FALSE;
+			}
+			urlParams->uid = cuid;
+			urlParams->pageNum = 0;
+
+			spParamNode.Release();
+		}
+		Url url = new Url((LPVOID)urlParams);
+		CString urlstr = url.GenerateUrl();
+		cjt->url=urlstr;
+		cjt->count=0;
+		cjt->flush=20;
+
+		int row=m_list.InsertItem(i,cjt->name); //用insertitem ,返回行数
+		m_list.SetItemText(row,1,cjt->url);
+		CString count,flush;
+		count.Format(_T("%d"), cjt->count);
+		flush.Format(_T("%d"), cjt->flush);
+		m_list.SetItemText(row,2,count);
+		m_list.SetItemText(row,3,flush);
+		cjt->clist = &m_list;
+		cjt->row = row;
+
+		AfxBeginThread(CaijiThreadFunction,(LPVOID)cjt); 
+
+		spNode.Release();
+		spUrlParamList.Release();
+	}
+	spNodeList.Release();
+	spDoc.Release();
+
+    ::CoUninitialize();
+}
+
+void CCaiJDlg::OnOK()
+{
+	// TODO: 在此添加专用代码和/或调用基类
+
+	CCaiJDlg::OnBnClickedButtonStart();
+}
+
+BOOL CCaiJDlg::PreTranslateMessage(MSG* pMsg)
+{
+	// TODO: 在此添加专用代码和/或调用基类  
+    //if(pMsg->message == WM_KEYDOWN   &&   pMsg->wParam == VK_ESCAPE)     
+    //{     
+        //将ESC键的消息替换为回车键的消息，这样，按ESC的时候  
+        //也会和回车键一样去调用OnOK函数，而OnOK什么也不做，这样ESC也被屏蔽  
+        //pMsg->wParam = VK_RETURN;  
+    //}   
+    return CDialog::PreTranslateMessage(pMsg);  
 }

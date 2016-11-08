@@ -8,6 +8,10 @@
 #define STYPE_BK 2
 #define STYPE_BS 3
 #define STYPE_OP 4
+#define STYPE_TN 5
+#define STYPE_BV 6
+#define STYPE_TT 7
+#define STYPE_BM 8
 
 struct URLPARAMS
 {
