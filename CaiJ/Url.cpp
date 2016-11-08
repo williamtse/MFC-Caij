@@ -1,51 +1,50 @@
 #include "StdAfx.h"
 #include "Url.h"
 
-Url::Url(URLPARAMS urlParams)
+Url::Url(LPVOID urlParams)
 {
-	uid = urlParams.uid;
-	stype = urlParams.stype;
-	script = urlParams.script;
-	rtype = urlParams.rtype;
-	pageNum = urlParams.pageNum;
-	is_future = urlParams.is_future;
+    URLPARAMS *up = (URLPARAMS *)urlParams;
+	type = up->type;
+	sport = up->sport;
+	uid = up->uid;
+	stype = up->stype;
+	rtype = up->rtype;
+	pageNum = up->pageNum;
+	is_future = up->is_future;
 }
 
 Url::~Url(void)
 {
 }
 
-Url::GenerateUrl(){
+CString Url::GenerateUrl(){
 	CString url;
-	switch(script){
-		case L"body_var":
-			url = SITE+L"/app/member/"+stype+L"_"+(is_future?L"future":L"browse")
-				+L"/body_var.php?uid="
-				+cuid+L"&rtype="+rtype+L"&langx=zh-cn&mtype=3&page_no="+pageNum;
+	CString browse=is_future?L"future":L"browse";
+	switch(type){
+		case TYPE_BODY_VAR:
+			url.Format(L"%s/app/member/%s_%s/body_var.php?uid=%s&rtype=%s&langx=zh-cn&mtype=3&page_no=%d",SITE,uid,browse,stype,rtype,pageNum);
 			break;
-		case L"reloadgame":
-			url = SITE+L"/app/member/browse_FS/reloadgame_R.php?FStype="+stype+L"&rtype="+rtype+L"&uid="
-						+uid+L"langx=zh-cn";
+		case TYPE_RELOADGAME:
+			url.Format(L"%s/app/member/browse_FS/reloadgame_R.php?FStype=%s&rtype=%s&uid=%s&langx=zh-cn",SITE,stype,rtype,uid);
 			break;
-		case L"result":
-			SYSTEMTIME st; 　　
-			CString strDate,strTime; 　　
-			GetLocalTime(&st); 　　
-			strDate.Format("%4d-%2d-%2d",st.wYear,st.wMonth,st.wDay);
+		case TYPE_RESULT:
+			SYSTEMTIME st;
+            CString strDate,strTime;
+            GetLocalTime(&st);
+			strDate.Format(L"%4d-%2d-%2d",st.wYear,st.wMonth,st.wDay);
 			CString file;
-			switch(stype){
-				case 'FT':
-				case 'BK':
-				case 'BS':
-				case 'OP':
+			switch(sport){
+				case STYPE_FT:
+				case STYPE_BK:
+				case STYPE_BS:
+				case STYPE_OP:
 					file=L"result.php";
 				break;
 				default:
-					file=L"result_"+stype+L".php";
+					file.Format(L"result_%s.php",stype);
 					break;
 			}
-			url = SITE+L"/app/member/result/"+file+L"?game_type="+stype+L"&list_date="+strDate+L"&uid="
-						+uid+L"langx=zh-cn";
+			url.Format(L"%s/app/member/result/%s?game_type=%s&list_date=%s&uid=%s&langx=zh-cn",SITE,file,stype,strDate,uid);
 			break;
 	}
 	return url;

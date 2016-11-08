@@ -6,6 +6,8 @@
 #include "CaiJDlg.h"
 #include "HttpClient.h"
 #include "Query.h"
+#include "Url.h"
+
 
 
 #ifdef _DEBUG
@@ -189,7 +191,7 @@ void Wchar_tToString(std::string& szDst, wchar_t *wchar)
 
 
 UINT   CaijiThreadFunction(LPVOID pParam){
-	CaijiTask *ctj = (CaijiTask *)pParam;
+	CAIJI_TASK *ctj = (CAIJI_TASK *)pParam;
 	HttpClient *hc = new HttpClient;
 	int t=0;
 	CString st;
@@ -197,7 +199,7 @@ UINT   CaijiThreadFunction(LPVOID pParam){
 	while(1){
 		if(t==0){
 			CString html = hc->GetHttpCode(ctj->url,METHOD_GET,NULL);
-			Query qr = new Query();
+			Query *qr = new Query();
 			int pageNum = qr->getPageNum(html);
 			if(pageNum>1){
 				while(pageNum>0){
@@ -206,7 +208,9 @@ UINT   CaijiThreadFunction(LPVOID pParam){
 					html+=hc->GetHttpCode(ctj->url+L"&page_no="+pageNumStr,METHOD_GET,NULL);
 				}
 			}
-
+			CString pageNumStr;
+			pageNumStr.Format(L"%d",pageNum);
+			ctj->clist->SetItemText(ctj->row,2,pageNumStr);
 			
 			ctj->clog->SetWindowText(L"is match");
 			t=ctj->flush;
@@ -214,7 +218,7 @@ UINT   CaijiThreadFunction(LPVOID pParam){
 		Sleep(1000);
 		t--;
 		st.Format(_T("%d"), t);
-		ctj->clist->SetItemText(ctj->row,4,st);
+		ctj->clist->SetItemText(ctj->row,4,st);//倒计时
 	}
 	return 0;
 };
@@ -224,10 +228,22 @@ void CCaiJDlg::OnBnClickedButtonStart()
 	GetDlgItem(IDC_BUTTON_START)->EnableWindow(FALSE);
 	UpdateData(TRUE);
 	CString cuid = m_uid;
-	CString url = L"http://66.133.87.55/app/member/FT_browse/body_var.php?uid="+cuid+L"&rtype=r&langx=zh-cn&mtype=3&page_no=0&league_id=&hot_game=";
-	CaijiTask *cjt = new CaijiTask;
+	
+	URLPARAMS *urlParams = new URLPARAMS;
+	urlParams->is_future = FALSE;
+	urlParams->pageNum = 0;
+	urlParams->rtype = L"r";
+	urlParams->type = TYPE_BODY_VAR;
+	urlParams->sport = STYPE_FT;
+	urlParams->stype = L"FT";
+	urlParams->uid = cuid;
+	
+	Url url = new Url((LPVOID)urlParams);
+	CString urlstr = url.GenerateUrl();
+
+	CAIJI_TASK *cjt = new CAIJI_TASK;
 	cjt->name= L"足球-赛事-让球";
-	cjt->url=url;
+	cjt->url=urlstr;
 	cjt->count=0;
 	cjt->flush=20;
 	cjt->clog = &c_log;

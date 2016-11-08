@@ -16,7 +16,7 @@ Helper::~Helper(void)
  * @strContent  : 待查找的字符串
  * @arrDest     : 保存分割之后的数组
  */
-void static Helper::StrExplode(TCHAR szDelimiter, CString strContent, CStringArray &arrDest){
+void Helper::StrExplode(TCHAR szDelimiter, CString strContent, CStringArray &arrDest){
 	arrDest.RemoveAll();
 	int nOffset = 0;
 	while (true)
@@ -37,12 +37,12 @@ void static Helper::StrExplode(TCHAR szDelimiter, CString strContent, CStringArr
 	}
 }
 
-void static Helper::Combine(CStringArray arr1,CStringArray arr2,std::map<CString,CString> &dest){
+void Helper::Combine(CStringArray &arr1,CStringArray &arr2,std::map<CString,CString> &dest){
 	int arr1Count = arr1.GetCount();
 	int arr2Count = arr2.GetCount();
 	int count;
 	count = arr1Count>arr2Count ? arr2Count:arr1Count;
 	for(int i;i<count;i++){
-		dest.insert(pair<CString,CString>(arr1[i],arr2[i]));
+		dest.insert(std::pair<CString,CString>(arr1[i],arr2[i]));
 	}
 }

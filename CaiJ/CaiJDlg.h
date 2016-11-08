@@ -52,4 +52,4 @@ typedef struct {
 	CEdit* clog;
 	int row;
 	CListBox* cresult;
-}CaijiTask;
+}CAIJI_TASK;
