@@ -9,7 +9,6 @@ Url::Url(LPVOID urlParams)
 	uid = up->uid;
 	stype = up->stype;
 	rtype = up->rtype;
-	pageNum = up->pageNum;
 	is_future = up->is_future;
 }
 
@@ -22,7 +21,7 @@ CString Url::GenerateUrl(){
 	CString browse=is_future?L"future":L"browse";
 	switch(type){
 		case TYPE_BODY_VAR:
-			url.Format(L"%s/app/member/%s_%s/body_var.php?uid=%s&rtype=%s&langx=zh-cn&mtype=3&page_no=%d",SITE,uid,browse,stype,rtype,pageNum);
+			url.Format(L"%s/app/member/%s_%s/body_var.php?uid=%s&rtype=%s&langx=zh-cn&mtype=3",SITE,uid,browse,stype,rtype);
 			break;
 		case TYPE_RELOADGAME:
 			url.Format(L"%s/app/member/browse_FS/reloadgame_R.php?FStype=%s&rtype=%s&uid=%s&langx=zh-cn",SITE,stype,rtype,uid);

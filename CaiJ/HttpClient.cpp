@@ -91,7 +91,7 @@ CString HttpClient::GetHttpCode(CString &url,int strMethod=METHOD_GET,CString st
         {
             try
             {
-                //htmlFile = (CHttpFile*)session.OpenURL(url);//打开链接
+                htmlFile = (CHttpFile*)session.OpenURL(url);//打开链接
 				
                 while (htmlFile->ReadString(sRecv, 1024))
                 {

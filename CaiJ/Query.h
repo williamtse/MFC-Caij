@@ -1,15 +1,12 @@
 #pragma once
-#include <map>
-
-typedef std::map<CString,CString> UDT_MAP_CSTRING_CSTRING;
-
+#include <string>
 class Query
 {
 public:
 	Query(void);
 	~Query(void);
-	std::map<int,UDT_MAP_CSTRING_CSTRING> queryBodyVar(CString html);
+	void queryBodyVar(CString html,CStringArray &matches);
 	int getPageNum(CString html);
 	CString getHeaderStr(CString html);
-	std::string GetFirstMatch(CString html,std::string pattern);
+	CString GetFirstMatch(CString html,CString begin,CString end);
 };

@@ -42,7 +42,7 @@ void Helper::Combine(CStringArray &arr1,CStringArray &arr2,std::map<CString,CStr
 	int arr2Count = arr2.GetCount();
 	int count;
 	count = arr1Count>arr2Count ? arr2Count:arr1Count;
-	for(int i;i<count;i++){
+	for(int i=0;i<count;i++){
 		dest.insert(std::pair<CString,CString>(arr1[i],arr2[i]));
 	}
 }

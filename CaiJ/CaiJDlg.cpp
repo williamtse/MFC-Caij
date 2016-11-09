@@ -7,12 +7,15 @@
 #include "HttpClient.h"
 #include "Query.h"
 #include "Url.h"
+#include "Helper.h"
 
 
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+bool keep=TRUE;
 
 void CString2UTF8(CString strParams,char *c){
 
@@ -73,6 +76,7 @@ void CCaiJDlg::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_LIST1, m_list);
 	DDX_Text(pDX, IDC_EDIT_UID, m_uid);
+	DDX_Control(pDX, IDC_LIST2, m_result);
 }
 
 BEGIN_MESSAGE_MAP(CCaiJDlg, CDialog)
@@ -81,6 +85,7 @@ BEGIN_MESSAGE_MAP(CCaiJDlg, CDialog)
 	ON_WM_QUERYDRAGICON()
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_BUTTON_START, &CCaiJDlg::OnBnClickedButtonStart)
+	ON_BN_CLICKED(IDC_BTN_STOP, &CCaiJDlg::OnBnClickedBtnStop)
 END_MESSAGE_MAP()
 
 
@@ -120,11 +125,11 @@ BOOL CCaiJDlg::OnInitDialog()
 	m_list.InsertColumn( 3, L"数量", LVCFMT_LEFT, 50 );
 	m_list.InsertColumn( 4, L"刷新", LVCFMT_LEFT, 50 );
 
-	m_uid = L"i4kjc7jfm15965600l4785579";
+	m_uid = L"ngz1eajim15965600l135988";
 	UpdateData(FALSE);
 
-	
-
+	keep = TRUE;
+	m_result.SetHorizontalExtent(10000);
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -189,29 +194,48 @@ void Wchar_tToString(std::string& szDst, wchar_t *wchar)
 }
 
 
-
+//采集线程函数
 UINT   CaijiThreadFunction(LPVOID pParam){
 	CAIJI_TASK *ctj = (CAIJI_TASK *)pParam;
 	HttpClient *hc = new HttpClient;
 	int t=0;
 	CString st;
 	CString matchCount;
-	while(1){
+	Query *qr = new Query();
+	CString url = ctj->url;
+	while(keep){
 		if(t==0){
-			CString html = hc->GetHttpCode(ctj->url,METHOD_GET,NULL);
-			Query *qr = new Query();
+			html = hc->GetHttpCode(url,METHOD_GET,NULL);
 			int pageNum = qr->getPageNum(html);
-			if(pageNum>1){
-				while(pageNum>0){
-					CString pageNumStr;
-					pageNumStr.Format(L"%d",pageNum);
-					html+=hc->GetHttpCode(ctj->url+L"&page_no="+pageNumStr,METHOD_GET,NULL);
-				}
-			}
 			CString pageNumStr;
 			pageNumStr.Format(L"%d",pageNum);
-			ctj->clist->SetItemText(ctj->row,2,pageNumStr);
 
+			if(pageNum>1){
+				while(pageNum>0){
+					pageNum--;
+					CString page_no;
+					page_no.Format(L"%d",pageNum);
+					ctj->url.Format(L"%s&page_no=%s",url,page_no);
+					html+=hc->GetHttpCode(ctj->url,METHOD_GET,NULL);
+				}
+			}
+			//解析提取数据
+			CStringArray matches;
+			qr->queryBodyVar(html,matches);
+			
+			int matchLen = matches.GetCount();
+			CString matchLenStr;
+			
+			if(matchLen>0){
+				for(int i=0;i<matchLen;i++)
+				{
+					ctj->cresult->AddString(matches.GetAt(i));
+					matchLenStr.Format(L"%d",i);
+					ctj->clist->SetItemText(ctj->row,3,matchLenStr);
+				}
+			}
+			ctj->clist->SetItemText(ctj->row,2,pageNumStr);
+			
 			t=ctj->flush;
 		}
 		Sleep(1000);
@@ -256,6 +280,8 @@ int getSTYPE(CString stype){
 void CCaiJDlg::OnBnClickedButtonStart()
 {
 	GetDlgItem(IDC_BUTTON_START)->EnableWindow(FALSE);
+	GetDlgItem(IDC_BTN_STOP)->EnableWindow(TRUE);
+	keep = TRUE;
 	UpdateData(TRUE);
 	CString cuid = m_uid;
 
@@ -321,7 +347,6 @@ void CCaiJDlg::OnBnClickedButtonStart()
 				urlParams->is_future = _FUTURE==L"Y"?TRUE:FALSE;
 			}
 			urlParams->uid = cuid;
-			urlParams->pageNum = 0;
 
 			spParamNode.Release();
 		}
@@ -330,6 +355,7 @@ void CCaiJDlg::OnBnClickedButtonStart()
 		cjt->url=urlstr;
 		cjt->count=0;
 		cjt->flush=20;
+		cjt->cresult = &m_result;
 
 		int row=m_list.InsertItem(i,cjt->name); //用insertitem ,返回行数
 		m_list.SetItemText(row,1,cjt->url);
@@ -354,19 +380,20 @@ void CCaiJDlg::OnBnClickedButtonStart()
 
 void CCaiJDlg::OnOK()
 {
-	// TODO: 在此添加专用代码和/或调用基类
-
 	CCaiJDlg::OnBnClickedButtonStart();
 }
 
 BOOL CCaiJDlg::PreTranslateMessage(MSG* pMsg)
 {
-	// TODO: 在此添加专用代码和/或调用基类  
-    //if(pMsg->message == WM_KEYDOWN   &&   pMsg->wParam == VK_ESCAPE)     
-    //{     
-        //将ESC键的消息替换为回车键的消息，这样，按ESC的时候  
-        //也会和回车键一样去调用OnOK函数，而OnOK什么也不做，这样ESC也被屏蔽  
-        //pMsg->wParam = VK_RETURN;  
-    //}   
+
     return CDialog::PreTranslateMessage(pMsg);  
+}
+
+void CCaiJDlg::OnBnClickedBtnStop()
+{
+	keep = FALSE;
+	m_list.DeleteAllItems();
+	GetDlgItem(IDC_BTN_STOP)->EnableWindow(FALSE);
+	GetDlgItem(IDC_BUTTON_START)->EnableWindow(TRUE);
+	m_result.ResetContent();
 }

@@ -39,6 +39,8 @@ protected:
 	virtual void OnOK();
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	afx_msg void OnBnClickedBtnStop();
+	CListBox m_result;
 };
 
 

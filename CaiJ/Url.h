@@ -20,7 +20,6 @@ struct URLPARAMS
 	CString stype;
 	CString uid;
 	CString rtype;
-	UINT pageNum;
 	bool is_future;
 };
 
@@ -36,6 +35,5 @@ public:
 	CString uid;
 	CString stype;
 	CString rtype;
-	UINT pageNum;
 	bool is_future;
 };
