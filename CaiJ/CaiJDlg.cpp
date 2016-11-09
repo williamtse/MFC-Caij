@@ -205,7 +205,7 @@ UINT   CaijiThreadFunction(LPVOID pParam){
 	CString url = ctj->url;
 	while(keep){
 		if(t==0){
-			html = hc->GetHttpCode(url,METHOD_GET,NULL);
+			CString html = hc->GetHttpCode(url,METHOD_GET,NULL);
 			int pageNum = qr->getPageNum(html);
 			CString pageNumStr;
 			pageNumStr.Format(L"%d",pageNum);
