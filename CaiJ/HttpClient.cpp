@@ -20,6 +20,7 @@ HttpClient::~HttpClient()
 //默认为GET请求，不带参数
 CString HttpClient::GetHttpCode(CString &url,int strMethod=METHOD_GET,CString strParams=NULL)
 {
+	m_HttpCode.Empty();
     //获取网页的初始化工作
     CInternetSession session(NULL, 0); 
     CHttpFile *htmlFile = NULL;

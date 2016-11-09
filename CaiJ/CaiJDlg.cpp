@@ -8,8 +8,9 @@
 #include "Query.h"
 #include "Url.h"
 #include "Helper.h"
-
-
+#include<shlwapi.h>
+#include "winsock.h"
+#include "mysql.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -67,6 +68,7 @@ CCaiJDlg::CCaiJDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CCaiJDlg::IDD, pParent)
 	, m_uid(_T(""))
 	, m_log(_T(""))
+	, m_xml(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -77,6 +79,7 @@ void CCaiJDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST1, m_list);
 	DDX_Text(pDX, IDC_EDIT_UID, m_uid);
 	DDX_Control(pDX, IDC_LIST2, m_result);
+	DDX_Text(pDX, IDC_EDIT_XML, m_xml);
 }
 
 BEGIN_MESSAGE_MAP(CCaiJDlg, CDialog)
@@ -86,6 +89,7 @@ BEGIN_MESSAGE_MAP(CCaiJDlg, CDialog)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_BUTTON_START, &CCaiJDlg::OnBnClickedButtonStart)
 	ON_BN_CLICKED(IDC_BTN_STOP, &CCaiJDlg::OnBnClickedBtnStop)
+	ON_BN_CLICKED(IDC_BTN_SEARCH, &CCaiJDlg::OnBnClickedBtnSearch)
 END_MESSAGE_MAP()
 
 
@@ -120,12 +124,12 @@ BOOL CCaiJDlg::OnInitDialog()
 
 	// TODO: 在此添加额外的初始化代码
 	m_list.InsertColumn( 0, L"名称", LVCFMT_LEFT, 110 );// 插入列 
-    m_list.InsertColumn( 1, L"URL", LVCFMT_LEFT, 790 );
+    m_list.InsertColumn( 1, L"URL", LVCFMT_LEFT, 200 );
 	m_list.InsertColumn( 2, L"页数", LVCFMT_LEFT,50);
 	m_list.InsertColumn( 3, L"数量", LVCFMT_LEFT, 50 );
 	m_list.InsertColumn( 4, L"刷新", LVCFMT_LEFT, 50 );
 
-	m_uid = L"ngz1eajim15965600l135988";
+	m_uid = L"q73cg9c23m15965600l167454";
 	UpdateData(FALSE);
 
 	keep = TRUE;
@@ -199,25 +203,23 @@ UINT   CaijiThreadFunction(LPVOID pParam){
 	CAIJI_TASK *ctj = (CAIJI_TASK *)pParam;
 	HttpClient *hc = new HttpClient;
 	int t=0;
-	CString st;
-	CString matchCount;
+	CString st,matchCount,html,ohtml;
 	Query *qr = new Query();
 	CString url = ctj->url;
 	while(keep){
 		if(t==0){
-			CString html = hc->GetHttpCode(url,METHOD_GET,NULL);
+			html = hc->GetHttpCode(url,METHOD_GET,NULL);
 			int pageNum = qr->getPageNum(html);
 			CString pageNumStr;
 			pageNumStr.Format(L"%d",pageNum);
-
-			if(pageNum>1){
-				while(pageNum>0){
-					pageNum--;
-					CString page_no;
-					page_no.Format(L"%d",pageNum);
-					ctj->url.Format(L"%s&page_no=%s",url,page_no);
-					html+=hc->GetHttpCode(ctj->url,METHOD_GET,NULL);
-				}
+			ctj->clist->SetItemText(ctj->row,2,pageNumStr);
+			while(pageNum>1){
+				pageNum--;
+				CString page_no;
+				page_no.Format(L"%d",pageNum);
+				ctj->url.Format(L"%s&page_no=%s",url,page_no);
+				ohtml = hc->GetHttpCode(ctj->url,METHOD_GET,NULL);
+				html += ohtml;
 			}
 			//解析提取数据
 			CStringArray matches;
@@ -234,15 +236,17 @@ UINT   CaijiThreadFunction(LPVOID pParam){
 					ctj->clist->SetItemText(ctj->row,3,matchLenStr);
 				}
 			}
-			ctj->clist->SetItemText(ctj->row,2,pageNumStr);
-			
 			t=ctj->flush;
+			html.Empty();
 		}
 		Sleep(1000);
 		t--;
 		st.Format(_T("%d"), t);
 		ctj->clist->SetItemText(ctj->row,4,st);//倒计时
 	}
+	delete qr;
+	delete hc;
+	delete ctj;
 	return 0;
 };
 
@@ -279,6 +283,12 @@ int getSTYPE(CString stype){
 //开始采集
 void CCaiJDlg::OnBnClickedButtonStart()
 {
+	UpdateData(TRUE);
+	CString urlXml = m_xml;
+	if(!PathFileExists(urlXml)){
+		AfxMessageBox(L"找不到urls.xml文件");
+		return;
+	}
 	GetDlgItem(IDC_BUTTON_START)->EnableWindow(FALSE);
 	GetDlgItem(IDC_BTN_STOP)->EnableWindow(TRUE);
 	keep = TRUE;
@@ -291,7 +301,21 @@ void CCaiJDlg::OnBnClickedButtonStart()
 	CComPtr<IXMLDOMDocument> spDoc; //DOM
 	spDoc.CoCreateInstance(CLSID_DOMDocument);//创建文档对象
 	VARIANT_BOOL vb;
-	spDoc->load(CComVariant(OLESTR("urls.xml")), &vb); //加载XML文件
+	if(spDoc->load(CComVariant(urlXml), &vb) != S_OK) //加载XML文件
+	{
+		AfxMessageBox(L"找不到urls.xml文件");
+		GetDlgItem(IDC_BTN_STOP)->EnableWindow(FALSE);
+		GetDlgItem(IDC_BUTTON_START)->EnableWindow(TRUE);
+		return;
+	}
+	MYSQL mysql; //数据库连接句柄  
+　　mysql init (&mysql);  
+　　if(!mysql_real_connect(&mysql,"localhost","root","","mydb",3306,NULL,0))  
+　　{  
+　　AfxMessageBox("数据库连接失败");  
+　　return FALSE;  
+　　}  
+
 	CComPtr<IXMLDOMElement> spRootEle;
 	spDoc->get_documentElement(&spRootEle); //根节点
 	CComPtr<IXMLDOMNodeList> spNodeList;
@@ -345,16 +369,20 @@ void CCaiJDlg::OnBnClickedButtonStart()
 				spParamNode->get_text(&value);
 				CString _FUTURE = CString(value);
 				urlParams->is_future = _FUTURE==L"Y"?TRUE:FALSE;
+			}else if(strValue == L"FLUSH_TIME"){
+				spParamNode->get_text(&value);
+				CString _flushTime = CString(value);
+				cjt->flush = _ttoi(_flushTime);
 			}
 			urlParams->uid = cuid;
 
 			spParamNode.Release();
 		}
-		Url url = new Url((LPVOID)urlParams);
-		CString urlstr = url.GenerateUrl();
+		Url *url = new Url((LPVOID)urlParams);
+		CString urlstr = url->GenerateUrl();
+		delete url;
 		cjt->url=urlstr;
 		cjt->count=0;
-		cjt->flush=20;
 		cjt->cresult = &m_result;
 
 		int row=m_list.InsertItem(i,cjt->name); //用insertitem ,返回行数
@@ -362,8 +390,8 @@ void CCaiJDlg::OnBnClickedButtonStart()
 		CString count,flush;
 		count.Format(_T("%d"), cjt->count);
 		flush.Format(_T("%d"), cjt->flush);
-		m_list.SetItemText(row,2,count);
-		m_list.SetItemText(row,3,flush);
+		m_list.SetItemText(row,3,count);
+		m_list.SetItemText(row,4,flush);
 		cjt->clist = &m_list;
 		cjt->row = row;
 
@@ -371,6 +399,7 @@ void CCaiJDlg::OnBnClickedButtonStart()
 
 		spNode.Release();
 		spUrlParamList.Release();
+		//delete urlParams;
 	}
 	spNodeList.Release();
 	spDoc.Release();
@@ -396,4 +425,20 @@ void CCaiJDlg::OnBnClickedBtnStop()
 	GetDlgItem(IDC_BTN_STOP)->EnableWindow(FALSE);
 	GetDlgItem(IDC_BUTTON_START)->EnableWindow(TRUE);
 	m_result.ResetContent();
+}
+
+void CCaiJDlg::OnBnClickedBtnSearch()
+{
+	TCHAR szFilter[] = _T("XML文件(*.xml)|*.xml|所有文件(*.*)|*.*||");   
+    // 构造打开文件对话框   
+    CFileDialog fileDlg(TRUE, _T("xml"), NULL, 0, szFilter, this);   
+    CString strFilePath;   
+  
+    // 显示打开文件对话框   
+    if (IDOK == fileDlg.DoModal())   
+    {   
+        // 如果点击了文件对话框上的“打开”按钮，则将选择的文件路径显示到编辑框里   
+        strFilePath = fileDlg.GetPathName();   
+        SetDlgItemText(IDC_EDIT_XML, strFilePath);   
+    }   
 }

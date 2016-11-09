@@ -6,5 +6,22 @@
     <RTYPE>r</RTYPE>
     <NAME>足球-赛事-让球</NAME>
     <FUTURE>N</FUTURE>
+    <FLUSH_TIME>180</FLUSH_TIME>
+  </URL>
+  <URL>
+    <TYPE>game</TYPE>
+    <STYPE>BK</STYPE>
+    <RTYPE>r_all</RTYPE>
+    <NAME>篮球-赛事-让球</NAME>
+    <FUTURE>N</FUTURE>
+    <FLUSH_TIME>180</FLUSH_TIME>
+  </URL>
+  <URL>
+    <TYPE>game</TYPE>
+    <STYPE>FT</STYPE>
+    <RTYPE>re</RTYPE>
+    <NAME>足球-滚球</NAME>
+    <FUTURE>N</FUTURE>
+    <FLUSH_TIME>30</FLUSH_TIME>
   </URL>
 </URLS>
