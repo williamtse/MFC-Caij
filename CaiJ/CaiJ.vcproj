@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;C:\Program Files\MySQL\MySQL Server 5.7\include&quot;"
+				AdditionalIncludeDirectories="&quot;E:\mysql-5.6.24-win32.1432006610\mysql-5.6.24-win32\include&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -68,9 +68,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="C:\Program Files\MySQL\MySQL Server 5.7\lib\libmysql.lib"
+				AdditionalDependencies="&quot;E:\mysql-5.6.24-win32.1432006610\mysql-5.6.24-win32\lib\libmysql.lib&quot;"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;C:\Program Files\MySQL\MySQL Server 5.7\lib&quot;"
+				AdditionalLibraryDirectories="&quot;E:\mysql-5.6.24-win32.1432006610\mysql-5.6.24-win32\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"

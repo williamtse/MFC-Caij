@@ -4,13 +4,7 @@
 #include "stdafx.h"
 #include "CaiJ.h"
 #include "CaiJDlg.h"
-#include "HttpClient.h"
-#include "Query.h"
-#include "Url.h"
-#include "Helper.h"
-#include<shlwapi.h>
-#include "winsock.h"
-#include "mysql.h"
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -134,6 +128,8 @@ BOOL CCaiJDlg::OnInitDialog()
 
 	keep = TRUE;
 	m_result.SetHorizontalExtent(10000);
+
+	DbConnected = FALSE;
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -229,9 +225,44 @@ UINT   CaijiThreadFunction(LPVOID pParam){
 			CString matchLenStr;
 			
 			if(matchLen>0){
+				
+
+				CString gameHead = qr->getHeaderStr(html);
+				CStringArray gameHeadArr ;
+				Helper::StrExplode(',',gameHead,gameHeadArr);
+				int glen = gameHeadArr.GetCount();
+				int len;
+				CString qsql = L"REPLACE INTO match_games SET ";
+				CString dsql = L"REPLACE INTO match_games_data (`id`,`gid`,`ziduan`,`gid_ziduan`,`val`) VALUES";
+				CString gid = gameHeadArr.GetAt(0);
 				for(int i=0;i<matchLen;i++)
 				{
-					ctj->cresult->AddString(matches.GetAt(i));
+					CString matchRow = matches.GetAt(i);
+					
+					CStringArray dest;
+					CStringArray matchRowArr;
+					Helper::StrExplode(',',matchRow,matchRowArr);
+					int mlen = matchRowArr.GetCount();
+					len = mlen>glen?glen:mlen;
+					for(int j=0;j<len;j++)
+					{
+						CString key = Helper::TrimSQuot(gameHeadArr.GetAt(j));
+						CString val = Helper::TrimSQuot(matchRowArr.GetAt(j));
+						if(j<8){
+							CString set;
+							set.Format(L"`%s`='%s'",key,val);
+							if(j==7) qsql+= set;
+							else qsql+=set+L",";
+						}else{
+							CString valstr;
+							valstr.Format(L"(NULL,'%s','%s','%s','%s')",gid,key,gid+L"#"+key,val);
+							if(j==len-1) dsql+=valstr;
+							else dsql+=valstr+L",";
+						}
+					}
+					
+					ctj->cresult->AddString(qsql);
+					ctj->cresult->AddString(dsql);
 					matchLenStr.Format(L"%d",i);
 					ctj->clist->SetItemText(ctj->row,3,matchLenStr);
 				}
@@ -283,6 +314,21 @@ int getSTYPE(CString stype){
 //开始采集
 void CCaiJDlg::OnBnClickedButtonStart()
 {
+	//连接mysql数据库
+	if(!DbConnected){
+	MYSQL m_sqlCon;
+	mysql_init(&m_sqlCon);
+		if(!mysql_real_connect(&m_sqlCon,"localhost","root","","ceshi_db",3306,NULL,0)){
+			const char* err=mysql_error(&m_sqlCon);
+			CString errCstr(err);
+			AfxMessageBox(errCstr);
+			return;
+		}else{
+			DbConnected = TRUE;
+			Db = &m_sqlCon;
+		}
+	}
+
 	UpdateData(TRUE);
 	CString urlXml = m_xml;
 	if(!PathFileExists(urlXml)){
@@ -308,13 +354,6 @@ void CCaiJDlg::OnBnClickedButtonStart()
 		GetDlgItem(IDC_BUTTON_START)->EnableWindow(TRUE);
 		return;
 	}
-	MYSQL mysql; //数据库连接句柄  
-　　mysql init (&mysql);  
-　　if(!mysql_real_connect(&mysql,"localhost","root","","mydb",3306,NULL,0))  
-　　{  
-　　AfxMessageBox("数据库连接失败");  
-　　return FALSE;  
-　　}  
 
 	CComPtr<IXMLDOMElement> spRootEle;
 	spDoc->get_documentElement(&spRootEle); //根节点

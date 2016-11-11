@@ -4,7 +4,13 @@
 #pragma once
 #include "afxcmn.h"
 #include "afxwin.h"
-
+#include "HttpClient.h"
+#include "Query.h"
+#include "Url.h"
+#include "Helper.h"
+#include<shlwapi.h>
+#include "winsock.h"
+#include "mysql.h"
 
 // CCaiJDlg ¶Ô»°¿ò
 class CCaiJDlg : public CDialog
@@ -43,6 +49,8 @@ public:
 	CListBox m_result;
 	afx_msg void OnBnClickedBtnSearch();
 	CString m_xml;
+	bool DbConnected;
+	MYSQL *Db;
 };
 
 

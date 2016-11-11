@@ -21,19 +21,19 @@ void Helper::StrExplode(TCHAR szDelimiter, CString strContent, CStringArray &arr
 	int nOffset = 0;
 	while (true)
 	{
-		nOffset = strContent.ReverseFind(szDelimiter);
+		nOffset = strContent.Find(szDelimiter);
 		if (nOffset == -1)
 		{
 			if (!strContent.IsEmpty())
 				arrDest.Add(strContent);
 			break;
 		}
-		CString strItem = strContent.Mid(nOffset+1);
+		CString strItem = strContent.Mid(0,nOffset);
 		if (!strItem.IsEmpty())
 		{
 			arrDest.Add(strItem);
 		}
-		strContent = strContent.Left(nOffset);
+		strContent = strContent.Mid(nOffset+1);
 	}
 }
 
@@ -45,4 +45,11 @@ void Helper::Combine(CStringArray &arr1,CStringArray &arr2,std::map<CString,CStr
 	for(int i=0;i<count;i++){
 		dest.insert(std::pair<CString,CString>(arr1[i],arr2[i]));
 	}
+}
+
+CString Helper::TrimSQuot(CString str)
+{
+	CString re;
+	re = str.Mid(1,str.GetLength()-2);
+	return re;
 }
