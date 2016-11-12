@@ -53,3 +53,8 @@ CString Helper::TrimSQuot(CString str)
 	re = str.Mid(1,str.GetLength()-2);
 	return re;
 }
+
+void Helper::FiltKG(CString &html)
+{
+	html.Replace(_T(" "),_T(""));
+}

@@ -39,7 +39,7 @@ int Query::getPageNum(CString html){
 
 CString Query::getHeaderStr(CString html){
 	CString headerStr;
-	headerStr = GetFirstMatch(html,L"_.GameHead =[",L"];");
+	headerStr = GetFirstMatch(html,L"_.GameHead=[",L"];");
 	return headerStr;
 }
 
@@ -51,4 +51,6 @@ CString Query::GetFirstMatch(CString html,CString begin,CString end){
 	match = html.Left(nOffset);
 	return match;
 }
+
+
 

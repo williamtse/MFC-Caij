@@ -226,6 +226,9 @@ UINT   CaijiThreadFunction(LPVOID pParam){
 				ohtml = hc->GetHttpCode(ctj->url,METHOD_GET,NULL);
 				html += ohtml;
 			}
+
+			Helper::FiltKG(html);
+
 			//解析提取数据
 			CStringArray matches;
 			qr->queryBodyVar(html,matches);
@@ -279,13 +282,13 @@ UINT   CaijiThreadFunction(LPVOID pParam){
                     size_t sz=0;
                     wcstombs_s(&sz,pstr,strsize,qsql,_TRUNCATE);
 
-					CString line = qsql;
+					/*CString line = qsql;
 					CStdioFile file;
 					CFileException fileException;
 					if(file.Open(L"E:\\log.txt",CFile::typeText|CFile::modeCreate|CFile::modeReadWrite,&fileException)){ 
 						file.WriteString(line+L"\n");
 					}
-
+					file.Close();*/
 					if(!mysql_query(Db, pstr)){
 						const char* errStr = mysql_error(Db);
 						CString err(errStr);
