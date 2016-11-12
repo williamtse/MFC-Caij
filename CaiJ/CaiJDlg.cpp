@@ -11,7 +11,7 @@
 #endif
 
 bool keep=TRUE;
-
+MYSQL *Db;
 void CString2UTF8(CString strParams,char *c){
 
      LPTSTR  str=  strParams.GetBuffer(strParams.GetLength());
@@ -193,6 +193,15 @@ void Wchar_tToString(std::string& szDst, wchar_t *wchar)
 	delete []psText;// psText的清除
 }
 
+const char * CStrToCCharP(CString str){
+                        // 先得到要转换为字符的长度
+                        const size_t strsize=(str.GetLength()+1)*2; // 宽字符的长度;
+                        char * pstr= new char[strsize]; //分配空间;
+                        size_t sz=0;
+                        wcstombs_s(&sz,pstr,strsize,str,_TRUNCATE);
+                        return pstr;
+}
+
 
 //采集线程函数
 UINT   CaijiThreadFunction(LPVOID pParam){
@@ -231,7 +240,6 @@ UINT   CaijiThreadFunction(LPVOID pParam){
 				CStringArray gameHeadArr ;
 				Helper::StrExplode(',',gameHead,gameHeadArr);
 				int glen = gameHeadArr.GetCount();
-				int len;
 				CString qsql = L"REPLACE INTO match_games SET ";
 				CString dsql = L"REPLACE INTO match_games_data (`id`,`gid`,`ziduan`,`gid_ziduan`,`val`) VALUES";
 				CString gid = gameHeadArr.GetAt(0);
@@ -243,7 +251,7 @@ UINT   CaijiThreadFunction(LPVOID pParam){
 					CStringArray matchRowArr;
 					Helper::StrExplode(',',matchRow,matchRowArr);
 					int mlen = matchRowArr.GetCount();
-					len = mlen>glen?glen:mlen;
+					int len = mlen>glen?glen:mlen;
 					for(int j=0;j<len;j++)
 					{
 						CString key = Helper::TrimSQuot(gameHeadArr.GetAt(j));
@@ -260,11 +268,34 @@ UINT   CaijiThreadFunction(LPVOID pParam){
 							else dsql+=valstr+L",";
 						}
 					}
+
+					
+
 					
 					ctj->cresult->AddString(qsql);
 					ctj->cresult->AddString(dsql);
+					const size_t strsize=(qsql.GetLength()+1)*2; // 宽字符的长度;
+                    char * pstr= new char[strsize]; //分配空间;
+                    size_t sz=0;
+                    wcstombs_s(&sz,pstr,strsize,qsql,_TRUNCATE);
+
+					CString line = qsql;
+					CStdioFile file;
+					CFileException fileException;
+					if(file.Open(L"E:\\log.txt",CFile::typeText|CFile::modeCreate|CFile::modeReadWrite,&fileException)){ 
+						file.WriteString(line+L"\n");
+					}
+
+					if(!mysql_query(Db, pstr)){
+						const char* errStr = mysql_error(Db);
+						CString err(errStr);
+						AfxMessageBox(err);
+						delete pstr;
+						return 0;
+					}
 					matchLenStr.Format(L"%d",i);
 					ctj->clist->SetItemText(ctj->row,3,matchLenStr);
+					delete pstr;
 				}
 			}
 			t=ctj->flush;

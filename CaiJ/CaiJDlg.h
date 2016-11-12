@@ -50,7 +50,7 @@ public:
 	afx_msg void OnBnClickedBtnSearch();
 	CString m_xml;
 	bool DbConnected;
-	MYSQL *Db;
+	
 };
 
 
@@ -67,3 +67,4 @@ typedef struct {
 	int row;
 	CListBox* cresult;
 }CAIJI_TASK;
+
