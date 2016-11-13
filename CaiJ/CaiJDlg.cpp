@@ -9,19 +9,8 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
 bool keep=TRUE;
-MYSQL *Db;
-void CString2UTF8(CString strParams,char *c){
-
-     LPTSTR  str=  strParams.GetBuffer(strParams.GetLength());
-
-     int utf8Len = WideCharToMultiByte(CP_UTF8, 0, str, strParams.GetLength(), NULL, 0, NULL, NULL);
-
-     c = new char[utf8Len];
-     int nRtn = WideCharToMultiByte(CP_UTF8, 0, str, strParams.GetLength(), c, utf8Len, NULL, NULL);
-}
-
+DataBase* DbHandler = new DataBase();
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
 class CAboutDlg : public CDialog
@@ -123,13 +112,14 @@ BOOL CCaiJDlg::OnInitDialog()
 	m_list.InsertColumn( 3, L"数量", LVCFMT_LEFT, 50 );
 	m_list.InsertColumn( 4, L"刷新", LVCFMT_LEFT, 50 );
 
-	m_uid = L"q73cg9c23m15965600l167454";
+	m_uid = L"27cnrgpvm15965600l642752";
 	UpdateData(FALSE);
 
 	keep = TRUE;
 	m_result.SetHorizontalExtent(10000);
 
 	DbConnected = FALSE;
+	GetDlgItem(IDC_BTN_STOP)->EnableWindow(FALSE);
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -182,27 +172,6 @@ HCURSOR CCaiJDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-void Wchar_tToString(std::string& szDst, wchar_t *wchar)
-{
-	wchar_t * wText = wchar;
-	DWORD dwNum = WideCharToMultiByte(CP_OEMCP,NULL,wText,-1,NULL,0,NULL,FALSE);// WideCharToMultiByte的运用
-	char *psText;  // psText为char*的临时数组，作为赋值给std::string的中间变量
-	psText = new char[dwNum];
-	WideCharToMultiByte (CP_OEMCP,NULL,wText,-1,psText,dwNum,NULL,FALSE);// WideCharToMultiByte的再次运用
-	szDst = psText;// std::string赋值
-	delete []psText;// psText的清除
-}
-
-const char * CStrToCCharP(CString str){
-                        // 先得到要转换为字符的长度
-                        const size_t strsize=(str.GetLength()+1)*2; // 宽字符的长度;
-                        char * pstr= new char[strsize]; //分配空间;
-                        size_t sz=0;
-                        wcstombs_s(&sz,pstr,strsize,str,_TRUNCATE);
-                        return pstr;
-}
-
-
 //采集线程函数
 UINT   CaijiThreadFunction(LPVOID pParam){
 	CAIJI_TASK *ctj = (CAIJI_TASK *)pParam;
@@ -237,68 +206,69 @@ UINT   CaijiThreadFunction(LPVOID pParam){
 			CString matchLenStr;
 			
 			if(matchLen>0){
-				
-
 				CString gameHead = qr->getHeaderStr(html);
 				CStringArray gameHeadArr ;
 				Helper::StrExplode(',',gameHead,gameHeadArr);
 				int glen = gameHeadArr.GetCount();
-				CString qsql = L"REPLACE INTO match_games SET ";
-				CString dsql = L"REPLACE INTO match_games_data (`id`,`gid`,`ziduan`,`gid_ziduan`,`val`) VALUES";
-				CString gid = gameHeadArr.GetAt(0);
-				for(int i=0;i<matchLen;i++)
+				
+				
+				
+				CFileException fileException;
+				for(int i=0;i<matchLen;++i)
 				{
+					
+					CString qsql = L"REPLACE INTO match_games SET ";
+					CString dsql = L"REPLACE INTO match_games_data (`id`,`gid`,`ziduan`,`gid_ziduan`,`val`) VALUES";
+					
 					CString matchRow = matches.GetAt(i);
 					
 					CStringArray dest;
 					CStringArray matchRowArr;
 					Helper::StrExplode(',',matchRow,matchRowArr);
+					
 					int mlen = matchRowArr.GetCount();
-					int len = mlen>glen?glen:mlen;
-					for(int j=0;j<len;j++)
+					//单行分解后
+					if(mlen>0)
 					{
-						CString key = Helper::TrimSQuot(gameHeadArr.GetAt(j));
-						CString val = Helper::TrimSQuot(matchRowArr.GetAt(j));
-						if(j<8){
-							CString set;
-							set.Format(L"`%s`='%s'",key,val);
-							if(j==7) qsql+= set;
-							else qsql+=set+L",";
-						}else{
-							CString valstr;
-							valstr.Format(L"(NULL,'%s','%s','%s','%s')",gid,key,gid+L"#"+key,val);
-							if(j==len-1) dsql+=valstr;
-							else dsql+=valstr+L",";
-						}
-					}
+							int len = mlen>glen?glen:mlen;
+							CString gid = Helper::TrimSQuot(matchRowArr.GetAt(0));
+							CString key=L"",val=L"",set=L"";
+							for(int j=0;j<len;j++)
+							{
+								key = Helper::TrimSQuot(gameHeadArr.GetAt(j));
+								val = Helper::TrimSQuot(matchRowArr.GetAt(j));
+								if(j<8){
+									set.Format(L"`%s`='%s'",key,val);
+									if(j==7) qsql+= set;
+									else qsql+=set+L",";
+								}else{
+									CString valstr;
+									valstr.Format(L"(NULL,'%s','%s','%s','%s')",gid,key,gid+L"#"+key,val);
+									if(j==len-1) dsql+=valstr;
+									else dsql+=valstr+L",";
+								}
+							}
+							ctj->cresult->AddString(qsql);
+							ctj->cresult->AddString(dsql);
+							CString qLog = qsql+L"\n";
+							CString dLog = dsql+L"\n";
 
-					
-
-					
-					ctj->cresult->AddString(qsql);
-					ctj->cresult->AddString(dsql);
-					const size_t strsize=(qsql.GetLength()+1)*2; // 宽字符的长度;
-                    char * pstr= new char[strsize]; //分配空间;
-                    size_t sz=0;
-                    wcstombs_s(&sz,pstr,strsize,qsql,_TRUNCATE);
-
-					/*CString line = qsql;
-					CStdioFile file;
-					CFileException fileException;
-					if(file.Open(L"E:\\log.txt",CFile::typeText|CFile::modeCreate|CFile::modeReadWrite,&fileException)){ 
-						file.WriteString(line+L"\n");
+							CFile  file(L"E:\\log.txt",CFile::modeCreate|CFile::modeNoTruncate|CFile::modeWrite);
+							ULONGLONG fl = file.GetLength();
+							WORD unicode = 0xFEFF; 
+							file.SeekToBegin();
+							file.Write(&unicode,2); 
+							file.SeekToEnd();
+							file.Write(qLog.GetBuffer(qsql.GetLength()),qLog.GetLength()*sizeof(TCHAR));
+							file.Close();
+							
+							if(!ctj->db->Execute(qsql)){
+								AfxMessageBox(ctj->db->getErrorMsg());
+							}
+							
+							matchLenStr.Format(L"%d",i);
+							ctj->clist->SetItemText(ctj->row,3,matchLenStr);
 					}
-					file.Close();*/
-					if(!mysql_query(Db, pstr)){
-						const char* errStr = mysql_error(Db);
-						CString err(errStr);
-						AfxMessageBox(err);
-						delete pstr;
-						return 0;
-					}
-					matchLenStr.Format(L"%d",i);
-					ctj->clist->SetItemText(ctj->row,3,matchLenStr);
-					delete pstr;
 				}
 			}
 			t=ctj->flush;
@@ -345,32 +315,50 @@ int getSTYPE(CString stype){
 	return STYPE;
 }
 
+void CCaiJDlg::SwitchBtn(bool start,bool stop)
+{
+	GetDlgItem(IDC_BUTTON_START)->EnableWindow(start);
+	GetDlgItem(IDC_BTN_STOP)->EnableWindow(stop);
+}
+
 //开始采集
 void CCaiJDlg::OnBnClickedButtonStart()
 {
+	SwitchBtn(FALSE,FALSE);
+
+	//检测网络连接
+	HttpClient *hc = new HttpClient;
+	CString testUrl = SITE;
+	if(!hc->CheckNetIsOk())
+	{
+		AfxMessageBox(hc->m_strError);
+		SwitchBtn(TRUE,FALSE);
+		return;
+	}
 	//连接mysql数据库
 	if(!DbConnected){
-	MYSQL m_sqlCon;
-	mysql_init(&m_sqlCon);
-		if(!mysql_real_connect(&m_sqlCon,"localhost","root","","ceshi_db",3306,NULL,0)){
-			const char* err=mysql_error(&m_sqlCon);
-			CString errCstr(err);
-			AfxMessageBox(errCstr);
-			return;
-		}else{
-			DbConnected = TRUE;
-			Db = &m_sqlCon;
+		if(!DbHandler->init()){
+			AfxMessageBox(DbHandler->getErrorMsg());
+			SwitchBtn(FALSE,TRUE);
+			return ;
 		}
+		if(!DbHandler->Connect()){
+			AfxMessageBox(DbHandler->getErrorMsg());
+			SwitchBtn(FALSE,TRUE);
+			return;
+		}
+		DbConnected = TRUE;
 	}
 
 	UpdateData(TRUE);
 	CString urlXml = m_xml;
 	if(!PathFileExists(urlXml)){
 		AfxMessageBox(L"找不到urls.xml文件");
+		GetDlgItem(IDC_BUTTON_START)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BTN_STOP)->EnableWindow(FALSE);
 		return;
 	}
-	GetDlgItem(IDC_BUTTON_START)->EnableWindow(FALSE);
-	GetDlgItem(IDC_BTN_STOP)->EnableWindow(TRUE);
+	
 	keep = TRUE;
 	UpdateData(TRUE);
 	CString cuid = m_uid;
@@ -401,6 +389,7 @@ void CCaiJDlg::OnBnClickedButtonStart()
 	{
 		URLPARAMS *urlParams = new URLPARAMS;
 		CAIJI_TASK *cjt = new CAIJI_TASK;//采集任务结构体
+		cjt->db = DbHandler;
 		CComPtr<IXMLDOMNode> spNode;
 		spNodeList->get_item(i, &spNode);
 		CComPtr<IXMLDOMNodeList> spUrlParamList;
@@ -476,8 +465,9 @@ void CCaiJDlg::OnBnClickedButtonStart()
 	}
 	spNodeList.Release();
 	spDoc.Release();
-
+	
     ::CoUninitialize();
+	GetDlgItem(IDC_BTN_STOP)->EnableWindow(TRUE);
 }
 
 void CCaiJDlg::OnOK()
@@ -497,7 +487,6 @@ void CCaiJDlg::OnBnClickedBtnStop()
 	m_list.DeleteAllItems();
 	GetDlgItem(IDC_BTN_STOP)->EnableWindow(FALSE);
 	GetDlgItem(IDC_BUTTON_START)->EnableWindow(TRUE);
-	m_result.ResetContent();
 }
 
 void CCaiJDlg::OnBnClickedBtnSearch()

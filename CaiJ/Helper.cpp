@@ -58,3 +58,60 @@ void Helper::FiltKG(CString &html)
 {
 	html.Replace(_T(" "),_T(""));
 }
+
+char* __stdcall Helper::UnicodeToUtf8( const WCHAR* wstr )
+{
+    const WCHAR* w;
+    // Convert unicode to utf8
+    int len = 0;
+    for ( w = wstr; *w; w++ ) {
+        if ( *w <0x0080 ) len++;
+        else if ( *w <0x0080 ) len += 2;
+        else len += 3;
+    }
+
+    unsigned char* szOut = ( unsigned char* )malloc( len+1 );
+
+    if ( szOut == NULL )
+        return NULL;
+
+    int i = 0;
+    for ( w = wstr; *w; w++ ) {
+        if ( *w <0x0080 )
+            szOut[i++] = ( unsigned char ) *w;
+        else if ( *w < 0x0080 ) {
+            szOut[i++] = 0xc0 | (( *w ) >> 6 );
+            szOut[i++] = 0x80 | (( *w ) & 0x3f );
+        }
+        else {
+            szOut[i++] = 0xe0 | (( *w ) >> 12 );
+            szOut[i++] =0x80 | (( ( *w ) >> 6 ) & 0x3f );
+            szOut[i++] = 0x80 | (( *w ) & 0x3f );
+        }    }
+
+    szOut[ i ] = '\0';
+    return ( char* )szOut;
+}
+
+
+
+const char * Helper::CTCC(CString cstr){
+    // 先得到要转换为字符的长度
+    const size_t strsize=(cstr.GetLength()+1)*2; // 宽字符的长度;
+    char * pstr= new char[strsize]; //分配空间;
+    size_t sz=0;
+    wcstombs_s(&sz,pstr,strsize,cstr,_TRUNCATE);
+    return pstr;
+}
+
+CString Helper::GetWorkDir() 
+{  
+ char pFileName[MAX_PATH]; 
+ int nPos = GetCurrentDirectory( MAX_PATH, (LPWSTR)pFileName); 
+ 
+ CString csFullPath(pFileName);  
+ if( nPos < 0 ) 
+  return CString(""); 
+ else 
+  return csFullPath; 
+}

@@ -17,7 +17,7 @@ public:
 
     //添加变量
 protected:
-    CString        m_strError;  //接受错误信息
+    
     CString        m_HttpCode;  //接受抓取的网页代码
     UINT           PageCode;   //CP_UTF8:65001 CP_ACP:0  转换代码用  
 
@@ -29,6 +29,9 @@ public:
     
     int OnProcessError(int dwRetcode, CInternetSession &session,
                 CHttpConnection *pServer, CHttpFile *pFile);//链接错误函数
+	bool CheckNetIsOk();
+public:
+	CString        m_strError;  //接受错误信息
 
 
 };

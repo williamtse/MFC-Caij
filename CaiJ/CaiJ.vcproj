@@ -50,7 +50,7 @@
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>
@@ -197,6 +197,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DataBase.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Helper.cpp"
 				>
 			</File>
@@ -232,6 +236,10 @@
 				RelativePath=".\Url.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\XmlQuery.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="头文件"
@@ -244,6 +252,10 @@
 			</File>
 			<File
 				RelativePath=".\CaiJDlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DataBase.h"
 				>
 			</File>
 			<File
@@ -274,6 +286,10 @@
 				RelativePath=".\Url.h"
 				>
 			</File>
+			<File
+				RelativePath=".\XmlQuery.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="资源文件"
@@ -295,6 +311,10 @@
 		</Filter>
 		<File
 			RelativePath=".\ClassDiagram1.cd"
+			>
+		</File>
+		<File
+			RelativePath=".\database.xml"
 			>
 		</File>
 		<File

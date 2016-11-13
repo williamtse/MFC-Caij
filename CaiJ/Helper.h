@@ -7,6 +7,9 @@ public:
 	~Helper(void);
 	void static StrExplode(TCHAR szDelimiter, CString strContent, CStringArray& arrDest);
 	void static Combine(CStringArray &arr1,CStringArray &arr2,std::map<CString,CString> &dest);
-	CString static Helper::TrimSQuot(CString str);
+	CString static TrimSQuot(CString str);
 	void static FiltKG(CString &html);
+	static char* __stdcall Helper::UnicodeToUtf8( const WCHAR* wstr );
+	static const char* CTCC(CString cstr);
+	static CString GetWorkDir();
 };

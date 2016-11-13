@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "HttpClient.h"
+#include "Url.h"
 
 CString szHeaders = _T("Accept: _T/*\r\nUser-Agent: LCD's Infobay Http Client\r\n");
 
@@ -15,11 +16,28 @@ HttpClient::~HttpClient()
 {
     m_strError.ReleaseBuffer();
 }
-
+bool HttpClient::CheckNetIsOk()
+{
+	CInternetSession session(NULL, 0); 
+	CInternetFile *file;
+	try{
+		session.SetOption(INTERNET_OPTION_CONNECT_TIMEOUT, 60000); // 3秒的连接超时
+		session.SetOption(INTERNET_OPTION_DATA_RECEIVE_TIMEOUT ,30000);//3秒接收超时
+		session.SetOption(INTERNET_OPTION_DATA_SEND_TIMEOUT  ,30000);//3秒接收超时
+		 session.SetOption(INTERNET_OPTION_CONNECT_RETRIES, 2);
+		file=(CInternetFile*)session.OpenURL(SITE,1,INTERNET_FLAG_TRANSFER_BINARY|INTERNET_FLAG_RELOAD);
+	}catch(CInternetException* m_pException){
+		file = NULL;
+		m_pException->Delete();
+		m_strError = _T("网络连接不正常，请检查网络连接！");
+		return FALSE;
+	}
+}
 //主要接口，输入网址，获取代码
 //默认为GET请求，不带参数
 CString HttpClient::GetHttpCode(CString &url,int strMethod=METHOD_GET,CString strParams=NULL)
 {
+	
 	m_HttpCode.Empty();
     //获取网页的初始化工作
     CInternetSession session(NULL, 0); 

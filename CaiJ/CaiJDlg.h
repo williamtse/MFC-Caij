@@ -9,9 +9,9 @@
 #include "Url.h"
 #include "Helper.h"
 #include<shlwapi.h>
-#include "winsock.h"
-#include "mysql.h"
 
+
+#include "DataBase.h"
 // CCaiJDlg 对话框
 class CCaiJDlg : public CDialog
 {
@@ -24,7 +24,7 @@ public:
 
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
-
+	void SwitchBtn(bool start,bool stop);
 
 // 实现
 protected:
@@ -43,6 +43,7 @@ public:
 	CString m_log;
 protected:
 	virtual void OnOK();
+	
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg void OnBnClickedBtnStop();
@@ -66,5 +67,6 @@ typedef struct {
 	CEdit* clog;
 	int row;
 	CListBox* cresult;
+	DataBase* db;
 }CAIJI_TASK;
 
