@@ -309,20 +309,24 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="conf"
+			>
+			<File
+				RelativePath=".\database.xml"
+				>
+			</File>
+			<File
+				RelativePath=".\urls.xml"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\ClassDiagram1.cd"
 			>
 		</File>
 		<File
-			RelativePath=".\database.xml"
-			>
-		</File>
-		<File
 			RelativePath=".\ReadMe.txt"
-			>
-		</File>
-		<File
-			RelativePath=".\urls.xml"
 			>
 		</File>
 	</Files>

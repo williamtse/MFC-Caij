@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MYSQL>
+  <HOST>localhost</HOST>
+  <USERNAME>root</USERNAME>
+  <PASSWORD></PASSWORD>
+  <DATABASE>ceshi_db</DATABASE>
+  <PORT>3306</PORT>
+  <CHARSET>utf8</CHARSET>
+</MYSQL>

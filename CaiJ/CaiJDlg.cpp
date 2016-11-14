@@ -9,8 +9,9 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
 bool keep=TRUE;
-DataBase* DbHandler = new DataBase();
+DataBase *DbHandler = new DataBase();
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
 class CAboutDlg : public CDialog
@@ -339,12 +340,12 @@ void CCaiJDlg::OnBnClickedButtonStart()
 	if(!DbConnected){
 		if(!DbHandler->init()){
 			AfxMessageBox(DbHandler->getErrorMsg());
-			SwitchBtn(FALSE,TRUE);
+			SwitchBtn(TRUE,FALSE);
 			return ;
 		}
 		if(!DbHandler->Connect()){
 			AfxMessageBox(DbHandler->getErrorMsg());
-			SwitchBtn(FALSE,TRUE);
+			SwitchBtn(TRUE,FALSE);
 			return;
 		}
 		DbConnected = TRUE;
