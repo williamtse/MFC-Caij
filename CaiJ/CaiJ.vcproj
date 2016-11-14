@@ -128,6 +128,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="&quot;E:\mysql-5.6.24-win32.1432006610\mysql-5.6.24-win32\include&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
 				MinimalRebuild="false"
 				RuntimeLibrary="2"
@@ -150,7 +151,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="libmysql.lib"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;E:\mysql-5.6.24-win32.1432006610\mysql-5.6.24-win32\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -314,6 +317,10 @@
 			>
 			<File
 				RelativePath=".\database.xml"
+				>
+			</File>
+			<File
+				RelativePath=".\login.xml"
 				>
 			</File>
 			<File

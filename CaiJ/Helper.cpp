@@ -106,13 +106,9 @@ const char * Helper::CTCC(CString cstr){
 
 CString Helper::GetWorkDir() 
 {  
-	HMODULE module = GetModuleHandle(0);
-	char pFileName[MAX_PATH];
-	GetModuleFileName(module, (LPWCH)pFileName, MAX_PATH);
-	CString csFullPath(pFileName);
-	int nPos = csFullPath.ReverseFind( _T('\\') );
-	if( nPos < 0 )
-		return CString("");
-	else
-		return csFullPath.Left( nPos );
+	CString strExePath;  
+ GetModuleFileName(NULL, strExePath.GetBuffer(MAX_PATH), MAX_PATH);  
+ strExePath.ReleaseBuffer();  
+ strExePath = strExePath.Left(strExePath.ReverseFind(_T('\\')));  
+ return strExePath;  
 }

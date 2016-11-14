@@ -53,6 +53,8 @@ CCaiJDlg::CCaiJDlg(CWnd* pParent /*=NULL*/)
 	, m_uid(_T(""))
 	, m_log(_T(""))
 	, m_xml(_T(""))
+	, m_user(_T(""))
+	, m_passwd(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -63,7 +65,8 @@ void CCaiJDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST1, m_list);
 	DDX_Text(pDX, IDC_EDIT_UID, m_uid);
 	DDX_Control(pDX, IDC_LIST2, m_result);
-	DDX_Text(pDX, IDC_EDIT_XML, m_xml);
+	DDX_Text(pDX, IDC_EDIT_USER, m_user);
+	DDX_Text(pDX, IDC_EDIT_PASSWD, m_passwd);
 }
 
 BEGIN_MESSAGE_MAP(CCaiJDlg, CDialog)
@@ -73,7 +76,7 @@ BEGIN_MESSAGE_MAP(CCaiJDlg, CDialog)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_BUTTON_START, &CCaiJDlg::OnBnClickedButtonStart)
 	ON_BN_CLICKED(IDC_BTN_STOP, &CCaiJDlg::OnBnClickedBtnStop)
-	ON_BN_CLICKED(IDC_BTN_SEARCH, &CCaiJDlg::OnBnClickedBtnSearch)
+	ON_BN_CLICKED(IDC_BUTTON_LOGIN, &CCaiJDlg::OnBnClickedButtonLogin)
 END_MESSAGE_MAP()
 
 
@@ -113,7 +116,7 @@ BOOL CCaiJDlg::OnInitDialog()
 	m_list.InsertColumn( 3, L"数量", LVCFMT_LEFT, 50 );
 	m_list.InsertColumn( 4, L"刷新", LVCFMT_LEFT, 50 );
 
-	m_uid = L"27cnrgpvm15965600l642752";
+	m_uid = L"cvcrkufgm15965600l1034307";
 	UpdateData(FALSE);
 
 	keep = TRUE;
@@ -351,10 +354,10 @@ void CCaiJDlg::OnBnClickedButtonStart()
 		DbConnected = TRUE;
 	}
 
-	UpdateData(TRUE);
-	CString urlXml = m_xml;
+	CString dir = Helper::GetWorkDir();
+	CString urlXml = dir+L"\\conf\\urls.xml";
 	if(!PathFileExists(urlXml)){
-		AfxMessageBox(L"找不到urls.xml文件");
+		AfxMessageBox(L"找不到"+urlXml+L"文件");
 		GetDlgItem(IDC_BUTTON_START)->EnableWindow(TRUE);
 		GetDlgItem(IDC_BTN_STOP)->EnableWindow(FALSE);
 		return;
@@ -490,18 +493,22 @@ void CCaiJDlg::OnBnClickedBtnStop()
 	GetDlgItem(IDC_BUTTON_START)->EnableWindow(TRUE);
 }
 
-void CCaiJDlg::OnBnClickedBtnSearch()
+
+
+void CCaiJDlg::OnBnClickedButtonLogin()
 {
-	TCHAR szFilter[] = _T("XML文件(*.xml)|*.xml|所有文件(*.*)|*.*||");   
-    // 构造打开文件对话框   
-    CFileDialog fileDlg(TRUE, _T("xml"), NULL, 0, szFilter, this);   
-    CString strFilePath;   
-  
-    // 显示打开文件对话框   
-    if (IDOK == fileDlg.DoModal())   
-    {   
-        // 如果点击了文件对话框上的“打开”按钮，则将选择的文件路径显示到编辑框里   
-        strFilePath = fileDlg.GetPathName();   
-        SetDlgItemText(IDC_EDIT_XML, strFilePath);   
-    }   
+	UpdateData(TRUE);
+	CString user = m_user;
+	CString passwd = m_passwd;
+	CString login_url;
+	//login_url.Format(L"%s/app/member/new_login.php",SITE);
+	login_url=L"http://hga008/test.php";
+	CString strParams;
+	strParams.Format(L"username=%s&passwd=%s&langx=zh-cn&auto=CBCCCI&blackbox=undefined",
+		user,passwd);
+	HttpClient *hc = new HttpClient();
+	CString response = hc->GetHttpCode(login_url,METHOD_POST,strParams);
+	delete hc;
+	m_uid = response;
+	UpdateData(FALSE);
 }
