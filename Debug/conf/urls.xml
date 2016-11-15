@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<URLS>
+  <URL>
+    <TYPE>game</TYPE>
+    <STYPE>FT</STYPE>
+    <RTYPE>r</RTYPE>
+    <NAME>足球-赛事-让球</NAME>
+    <FUTURE>N</FUTURE>
+    <FLUSH_TIME>180</FLUSH_TIME>
+  </URL>
+  
+</URLS>

@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "HttpClient.h"
 #include "Url.h"
+#include "Helper.h"
 
 CString szHeaders = _T("Accept: _T/*\r\nUser-Agent: LCD's Infobay Http Client\r\n");
 
@@ -42,6 +43,7 @@ CString HttpClient::GetHttpCode(CString &url,int strMethod=METHOD_GET,CString st
     //获取网页的初始化工作
     CInternetSession session(NULL, 0); 
     CHttpFile *htmlFile = NULL;
+	htmlFile = (CHttpFile*)session.OpenURL(url);//打开链接
     TCHAR sRecv[1024];  //接受缓存代码。
 
     //错误判断初始化
@@ -84,8 +86,9 @@ CString HttpClient::GetHttpCode(CString &url,int strMethod=METHOD_GET,CString st
 				htmlFile->SendRequest(szHeaders,(LPVOID)(LPCTSTR)strParams, strParams.GetLength());
 				break;
 			case METHOD_POST:
-				htmlFile = pServer->OpenRequest(CHttpConnection::HTTP_VERB_POST, strObject,NULL);
-				htmlFile->SendRequest(headerCT,(LPVOID)(LPCTSTR)strParams, strParams.GetLength());
+				htmlFile = pServer->OpenRequest(CHttpConnection::HTTP_VERB_POST, strObject,NULL, 1, NULL, NULL, dwHttpRequestFlags);
+				const char *postData = Helper::CTCC(strParams);
+				htmlFile->SendRequest(headerCT,(LPVOID)postData, strlen(postData));
 				break;
 		}
 
@@ -110,7 +113,7 @@ CString HttpClient::GetHttpCode(CString &url,int strMethod=METHOD_GET,CString st
         {
             try
             {
-                htmlFile = (CHttpFile*)session.OpenURL(url);//打开链接
+                
 				
                 while (htmlFile->ReadString(sRecv, 1024))
                 {
@@ -336,3 +339,4 @@ int HttpClient::OnProcessError(int dwRetcode, CInternetSession &session,
         return 0;
     }
 }
+

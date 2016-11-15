@@ -12,4 +12,6 @@ public:
 	static char* __stdcall Helper::UnicodeToUtf8( const WCHAR* wstr );
 	static const char* CTCC(CString cstr);
 	static CString GetWorkDir();
+	static char* Helper::UnicodeToUtf8(CString unicode);
+	static CString Helper::ExtraUid(CString html);
 };

@@ -93,7 +93,15 @@ char* __stdcall Helper::UnicodeToUtf8( const WCHAR* wstr )
     return ( char* )szOut;
 }
 
-
+char* Helper::UnicodeToUtf8(CString unicode)  
+{  
+    int len;    
+    len = WideCharToMultiByte(CP_UTF8, 0, (LPCWSTR)unicode, -1, NULL, 0, NULL, NULL);    
+    char *szUtf8=new char[len + 1];  
+    memset(szUtf8, 0, len * 2 + 2);  
+    WideCharToMultiByte (CP_UTF8, 0, (LPCWSTR)unicode, -1, szUtf8, len, NULL,NULL);  
+    return szUtf8;  
+}  
 
 const char * Helper::CTCC(CString cstr){
     // 先得到要转换为字符的长度
@@ -111,4 +119,13 @@ CString Helper::GetWorkDir()
  strExePath.ReleaseBuffer();  
  strExePath = strExePath.Left(strExePath.ReverseFind(_T('\\')));  
  return strExePath;  
+}
+
+CString Helper::ExtraUid(CString html)
+{
+	int pos1 = html.Find(L"||");
+	CString r = html.Mid(pos1+2);
+	int pos2 = r.Find(L"|");
+	CString uid = r.Left(pos2);
+	return uid;
 }

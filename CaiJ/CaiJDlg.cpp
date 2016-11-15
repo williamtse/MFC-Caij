@@ -124,6 +124,13 @@ BOOL CCaiJDlg::OnInitDialog()
 
 	DbConnected = FALSE;
 	GetDlgItem(IDC_BTN_STOP)->EnableWindow(FALSE);
+
+	INT_PTR nResponse = m_loginDlg.DoModal();
+	if( nResponse != IDOK)  
+	{  
+		OnCancel();  
+	}
+	
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -267,7 +274,12 @@ UINT   CaijiThreadFunction(LPVOID pParam){
 							file.Close();
 							
 							if(!ctj->db->Execute(qsql)){
-								AfxMessageBox(ctj->db->getErrorMsg());
+								CString error = ctj->db->getErrorMsg();
+								AfxMessageBox(error);
+								delete qr;
+								delete hc;
+								delete ctj;
+								return 0;
 							}
 							
 							matchLenStr.Format(L"%d",i);
@@ -332,7 +344,7 @@ void CCaiJDlg::OnBnClickedButtonStart()
 
 	//检测网络连接
 	HttpClient *hc = new HttpClient;
-	CString testUrl = SITE;
+	CString testUrl = IP_ADDR;
 	if(!hc->CheckNetIsOk())
 	{
 		AfxMessageBox(hc->m_strError);
@@ -501,14 +513,15 @@ void CCaiJDlg::OnBnClickedButtonLogin()
 	CString user = m_user;
 	CString passwd = m_passwd;
 	CString login_url;
-	//login_url.Format(L"%s/app/member/new_login.php",SITE);
-	login_url=L"http://hga008/test.php";
+	login_url.Format(L"%s/app/member/new_login.php",IP_ADDR);
+	//login_url=L"http://localhost/test.php";
 	CString strParams;
 	strParams.Format(L"username=%s&passwd=%s&langx=zh-cn&auto=CBCCCI&blackbox=undefined",
 		user,passwd);
 	HttpClient *hc = new HttpClient();
 	CString response = hc->GetHttpCode(login_url,METHOD_POST,strParams);
+	CString uid = Helper::ExtraUid(response);
 	delete hc;
-	m_uid = response;
+	m_uid = uid;
 	UpdateData(FALSE);
 }

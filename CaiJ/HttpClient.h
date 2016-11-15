@@ -14,6 +14,7 @@ class HttpClient
 public:
     HttpClient();
     virtual ~HttpClient();
+	
 
     //ÃÌº”±‰¡ø
 protected:

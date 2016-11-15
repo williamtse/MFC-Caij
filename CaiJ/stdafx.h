@@ -57,3 +57,5 @@
 
 #include <odbcinst.h> 
 #include "afxdb.h"
+
+#define IP_ADDR L"http://66.133.81.155/"

@@ -9,7 +9,7 @@
 #include "Url.h"
 #include "Helper.h"
 #include<shlwapi.h>
-
+#include "LoginDlg.h"
 
 #include "DataBase.h"
 // CCaiJDlg ¶Ô»°¿ò
@@ -41,6 +41,7 @@ public:
 	CString m_uid;
 	afx_msg void OnBnClickedButtonStart();
 	CString m_log;
+	CLoginDlg m_loginDlg;
 protected:
 	virtual void OnOK();
 	
