@@ -48,12 +48,14 @@ CString XmlQuery::GetNodeName(CComPtr<IXMLDOMNode> &spParamNode)
 {
 	CComBSTR name;
 	spParamNode->get_nodeName(&name);//URL参数节点的标签名
-	return name;
+	CString re(name);
+	return re;
 }
 
 CString XmlQuery::GetNodeValue(CComPtr<IXMLDOMNode> &spParamNode)
 {
 	CComBSTR value;
 	spParamNode->get_text(&value);
-	return value;
+	CString re(value);
+	return re;
 }

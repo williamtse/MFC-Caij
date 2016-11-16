@@ -53,8 +53,6 @@ CCaiJDlg::CCaiJDlg(CWnd* pParent /*=NULL*/)
 	, m_uid(_T(""))
 	, m_log(_T(""))
 	, m_xml(_T(""))
-	, m_user(_T(""))
-	, m_passwd(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -65,8 +63,6 @@ void CCaiJDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST1, m_list);
 	DDX_Text(pDX, IDC_EDIT_UID, m_uid);
 	DDX_Control(pDX, IDC_LIST2, m_result);
-	DDX_Text(pDX, IDC_EDIT_USER, m_user);
-	DDX_Text(pDX, IDC_EDIT_PASSWD, m_passwd);
 }
 
 BEGIN_MESSAGE_MAP(CCaiJDlg, CDialog)
@@ -76,7 +72,7 @@ BEGIN_MESSAGE_MAP(CCaiJDlg, CDialog)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_BUTTON_START, &CCaiJDlg::OnBnClickedButtonStart)
 	ON_BN_CLICKED(IDC_BTN_STOP, &CCaiJDlg::OnBnClickedBtnStop)
-	ON_BN_CLICKED(IDC_BUTTON_LOGIN, &CCaiJDlg::OnBnClickedButtonLogin)
+	ON_COMMAND(MENU_SETTING, &CCaiJDlg::OnSetting)
 END_MESSAGE_MAP()
 
 
@@ -111,12 +107,12 @@ BOOL CCaiJDlg::OnInitDialog()
 
 	// TODO: 在此添加额外的初始化代码
 	m_list.InsertColumn( 0, L"名称", LVCFMT_LEFT, 110 );// 插入列 
-    m_list.InsertColumn( 1, L"URL", LVCFMT_LEFT, 200 );
+    m_list.InsertColumn( 1, L"URL", LVCFMT_LEFT, 400 );
 	m_list.InsertColumn( 2, L"页数", LVCFMT_LEFT,50);
 	m_list.InsertColumn( 3, L"数量", LVCFMT_LEFT, 50 );
 	m_list.InsertColumn( 4, L"刷新", LVCFMT_LEFT, 50 );
 
-	m_uid = L"cvcrkufgm15965600l1034307";
+	
 	UpdateData(FALSE);
 
 	keep = TRUE;
@@ -129,6 +125,11 @@ BOOL CCaiJDlg::OnInitDialog()
 	if( nResponse != IDOK)  
 	{  
 		OnCancel();  
+	}
+	else
+	{
+		m_uid = m_loginDlg.m_uid;
+		UpdateData(FALSE);
 	}
 	
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
@@ -507,21 +508,13 @@ void CCaiJDlg::OnBnClickedBtnStop()
 
 
 
-void CCaiJDlg::OnBnClickedButtonLogin()
+
+
+void CCaiJDlg::OnSetting()
 {
-	UpdateData(TRUE);
-	CString user = m_user;
-	CString passwd = m_passwd;
-	CString login_url;
-	login_url.Format(L"%s/app/member/new_login.php",IP_ADDR);
-	//login_url=L"http://localhost/test.php";
-	CString strParams;
-	strParams.Format(L"username=%s&passwd=%s&langx=zh-cn&auto=CBCCCI&blackbox=undefined",
-		user,passwd);
-	HttpClient *hc = new HttpClient();
-	CString response = hc->GetHttpCode(login_url,METHOD_POST,strParams);
-	CString uid = Helper::ExtraUid(response);
-	delete hc;
-	m_uid = uid;
-	UpdateData(FALSE);
+	INT_PTR nResponse = m_settingDlg.DoModal();
+	if( nResponse == IDOK)  
+	{  
+		  AfxMessageBox(L"保存");
+	}
 }

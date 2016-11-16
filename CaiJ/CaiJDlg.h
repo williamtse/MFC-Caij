@@ -10,7 +10,7 @@
 #include "Helper.h"
 #include<shlwapi.h>
 #include "LoginDlg.h"
-
+#include "SettingDlg.h"
 #include "DataBase.h"
 // CCaiJDlg ¶Ô»°¿ò
 class CCaiJDlg : public CDialog
@@ -42,6 +42,7 @@ public:
 	afx_msg void OnBnClickedButtonStart();
 	CString m_log;
 	CLoginDlg m_loginDlg;
+	CSettingDlg m_settingDlg;
 protected:
 	virtual void OnOK();
 	
@@ -51,10 +52,7 @@ public:
 	CListBox m_result;
 	CString m_xml;
 	bool DbConnected;
-	
-	afx_msg void OnBnClickedButtonLogin();
-	CString m_user;
-	CString m_passwd;
+	afx_msg void OnSetting();
 };
 
 

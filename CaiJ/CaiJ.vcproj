@@ -204,6 +204,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DBDlg.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Helper.cpp"
 				>
 			</File>
@@ -216,7 +220,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LoginInfo.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Query.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SettingDlg.cpp"
 				>
 			</File>
 			<File
@@ -266,6 +278,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DBDlg.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Helper.h"
 				>
 			</File>
@@ -278,11 +294,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LoginInfo.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Query.h"
 				>
 			</File>
 			<File
 				RelativePath=".\Resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SettingDlg.h"
 				>
 			</File>
 			<File

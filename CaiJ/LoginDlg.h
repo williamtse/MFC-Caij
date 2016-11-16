@@ -21,5 +21,8 @@ protected:
 public:
 	CString m_username;
 	CString m_passwd;
+	CString m_uid;
 	afx_msg void OnBnClickedOk();
+	afx_msg void OnBnClickedButtonRelogin();
+	virtual BOOL OnInitDialog();
 };

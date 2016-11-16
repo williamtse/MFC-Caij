@@ -32,6 +32,7 @@ void CLoginDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CLoginDlg, CDialog)
 	ON_BN_CLICKED(IDOK, &CLoginDlg::OnBnClickedOk)
+	ON_BN_CLICKED(IDC_BUTTON_RELOGIN, &CLoginDlg::OnBnClickedButtonRelogin)
 END_MESSAGE_MAP()
 
 
@@ -56,11 +57,41 @@ void CLoginDlg::OnBnClickedOk()
 	delete hc;
 	if(uidLen>24)
 	{
-		AfxMessageBox(L"登陆成功");
+		WritePrivateProfileString(L"Login",L"UserName",user,INIPATH);
+		WritePrivateProfileString(L"Login",L"Password",passwd,INIPATH);
+		WritePrivateProfileString(L"Login",L"Uid",uid,INIPATH);
+		m_uid = uid;
+		OnOK();
 	}
 	else
 	{
 		AfxMessageBox(L"登陆失败");
 	}
 	UpdateData(FALSE);
+}
+
+//使用上次登陆
+void CLoginDlg::OnBnClickedButtonRelogin()
+{
+	CString uid;
+	GetPrivateProfileString(L"Login",L"Uid",uid,uid.GetBuffer(MAX_PATH),MAX_PATH,INIPATH);
+	m_uid = uid;
+	uid.ReleaseBuffer();
+	OnOK();
+}
+
+BOOL CLoginDlg::OnInitDialog()
+{
+	CDialog::OnInitDialog();
+
+	CString username,passwd;
+	GetPrivateProfileString(L"Login",L"UserName",username,username.GetBuffer(MAX_PATH),MAX_PATH,INIPATH);
+	GetPrivateProfileString(L"Login",L"Password",passwd,passwd.GetBuffer(MAX_PATH),MAX_PATH,INIPATH);
+	m_username = username;
+	m_passwd=passwd;
+	UpdateData(FALSE);
+	username.ReleaseBuffer();
+	passwd.ReleaseBuffer();
+	return TRUE;  // return TRUE unless you set the focus to a control
+	// 异常: OCX 属性页应返回 FALSE
 }
