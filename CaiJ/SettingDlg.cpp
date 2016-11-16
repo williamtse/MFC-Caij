@@ -82,17 +82,23 @@ void CSettingDlg::OnTcnSelchangeSettingtab(NMHDR *pNMHDR, LRESULT *pResult)
 void CSettingDlg::OnBnClickedOk()
 {
 	UpdateData(TRUE);
-	CString dbuser = m_dbdlg.m_dbuser;
-	CString dbhost = m_dbdlg.m_dbhost;
-	CString dbpasswd = m_dbdlg.m_dbpasswd;
-	CString dbname = m_dbdlg.m_dbname;
-	CString username = m_loginInfoDlg.m_username;
-	CString passwd = m_loginInfoDlg.m_passwd;
+	CString dbuser = m_dbdlg.GetDbUser();
+	CString dbhost = m_dbdlg.GetDbHost();
+	CString dbpasswd = m_dbdlg.GetDbPasswd();
+	CString dbname = m_dbdlg.GetDbName();
+	CString dbport = m_dbdlg.GetDbPort();
+	CString dbcharset = m_dbdlg.GetDbCharset();
+
+	CString username = m_loginInfoDlg.GetUserName();
+	CString passwd = m_loginInfoDlg.GetPasswd();
 
 	WritePrivateProfileString(L"DataBase",L"host",dbhost,INIPATH);
 	WritePrivateProfileString(L"DataBase",L"user",dbuser,INIPATH);
 	WritePrivateProfileString(L"DataBase",L"password",dbpasswd,INIPATH);
 	WritePrivateProfileString(L"DataBase",L"dbname",dbname,INIPATH);
+	WritePrivateProfileString(L"DataBase",L"port",dbport,INIPATH);
+	WritePrivateProfileString(L"DataBase",L"charset",dbcharset,INIPATH);
+
 	WritePrivateProfileString(L"Login",L"UserName",username,INIPATH);
 	WritePrivateProfileString(L"Login",L"Passwd",passwd,INIPATH);
 

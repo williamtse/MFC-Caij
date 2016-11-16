@@ -14,59 +14,28 @@ DataBase::~DataBase(void)
 //初始化数据库连接
 bool DataBase::init()
 {
-	XmlQuery xml;
-	CString dir = Helper::GetWorkDir();
-	CString dbcf = dir+L"\\conf\\database.xml";
-	if(!xml.load(dbcf))
-	{
-		errorMsg = L"找不到数据库配置文件"+dbcf;
-		return FALSE;
-	}
-	XMLDOMELEMENT root;
-	xml.GetRoot(root);
-	XMLDOMNODELIST list;
-	xml.GetNodes(root,list);
-	long len;
-	list->get_length(&len);
-	for(int i=0;i<len;i++)
-	{
-		XMLDOMNODE node ;
-		xml.GetItem(list,i,node);
-		CString nodeName =xml.GetNodeName(node);
-		CString cv = xml.GetNodeValue(node);
-		const char* nodeValue = Helper::CTCC(cv);
-		if(nodeName==L"HOST")
-		{
-			host = nodeValue;
-		}
-		else if(nodeName == L"USERNAME")
-		{
-			user = nodeValue;
-		}
-		else if(nodeName == L"PASSWORD")
-		{
-			password = nodeValue;
-		}
-		else if(nodeName == L"DATABASE")
-		{
-			database = nodeValue;
-		}
-		else if(nodeName == L"PORT")
-		{
-			port = atoi(nodeValue);
-		}
-		else if(nodeName == L"CHARSET")
-		{
-			CString set = L"set names "+cv;
-			charset = Helper::CTCC(set);
-		}
-		else
-		{
-			errorMsg = L"配置文件有错";
-			return FALSE;
-		}
-		
-	}
+	CString dbhost,dbuser,dbpasswd,dbname,dbport,dbcharset;
+	GetPrivateProfileString(L"DataBase",L"user",dbuser,dbuser.GetBuffer(MAX_PATH),MAX_PATH,INIPATH);
+	GetPrivateProfileString(L"DataBase",L"password",dbpasswd,dbpasswd.GetBuffer(MAX_PATH),MAX_PATH,INIPATH);
+	GetPrivateProfileString(L"DataBase",L"host",dbhost,dbhost.GetBuffer(MAX_PATH),MAX_PATH,INIPATH);
+	GetPrivateProfileString(L"DataBase",L"dbname",dbname,dbname.GetBuffer(MAX_PATH),MAX_PATH,INIPATH);
+	GetPrivateProfileString(L"DataBase",L"port",dbport,dbport.GetBuffer(MAX_PATH),MAX_PATH,INIPATH);
+	GetPrivateProfileString(L"DataBase",L"charset",dbcharset,dbcharset.GetBuffer(MAX_PATH),MAX_PATH,INIPATH);
+
+	host = Helper::CTCC(dbhost);
+	user = Helper::CTCC(dbuser);
+	password = Helper::CTCC(dbpasswd);
+	database = Helper::CTCC(dbname);
+	port = atoi(Helper::CTCC(dbport));
+	charset = Helper::CTCC(L"set names "+dbcharset);
+
+	dbuser.ReleaseBuffer();
+	dbpasswd.ReleaseBuffer();
+	dbhost.ReleaseBuffer();
+	dbname.ReleaseBuffer();
+	dbport.ReleaseBuffer();
+	dbcharset.ReleaseBuffer();
+
 	return TRUE;
 }
 

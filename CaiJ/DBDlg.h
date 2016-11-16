@@ -24,4 +24,12 @@ public:
 	CString m_dbpasswd;
 	CString m_dbname;
 	virtual BOOL OnInitDialog();
+	CString m_port;
+	CString m_charset;
+	CString GetDbHost();
+	CString GetDbUser();
+	CString GetDbPasswd();
+	CString GetDbPort();
+	CString GetDbCharset();
+	CString GetDbName();
 };

@@ -52,3 +52,15 @@ BOOL CLoginInfo::OnInitDialog()
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
 }
+
+CString CLoginInfo::GetUserName()
+{
+	UpdateData(TRUE);
+	return m_username;
+}
+
+CString  CLoginInfo::GetPasswd()
+{
+	UpdateData(TRUE);
+	return m_passwd;
+}

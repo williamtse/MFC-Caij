@@ -103,13 +103,13 @@ char* Helper::UnicodeToUtf8(CString unicode)
     return szUtf8;  
 }  
 
+//CString转const char*
 const char * Helper::CTCC(CString cstr){
-    // 先得到要转换为字符的长度
-    const size_t strsize=(cstr.GetLength()+1)*2; // 宽字符的长度;
-    char * pstr= new char[strsize]; //分配空间;
-    size_t sz=0;
-    wcstombs_s(&sz,pstr,strsize,cstr,_TRUNCATE);
-    return pstr;
+	CString str = cstr;
+	char szStr[256] = {0};
+	wcstombs(szStr, str, str.GetLength());//Unicode转换为ASCII
+	const char * p = szStr;
+	return p;
 }
 
 CString Helper::GetWorkDir() 

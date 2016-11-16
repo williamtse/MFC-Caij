@@ -22,4 +22,6 @@ public:
 	virtual BOOL OnInitDialog();
 	CString m_username;
 	CString m_passwd;
+	CString GetUserName();
+	CString GetPasswd();
 };

@@ -265,14 +265,14 @@ UINT   CaijiThreadFunction(LPVOID pParam){
 							CString qLog = qsql+L"\n";
 							CString dLog = dsql+L"\n";
 
-							CFile  file(L"E:\\log.txt",CFile::modeCreate|CFile::modeNoTruncate|CFile::modeWrite);
+							/*CFile  file(L"E:\\log.txt",CFile::modeCreate|CFile::modeNoTruncate|CFile::modeWrite);
 							ULONGLONG fl = file.GetLength();
 							WORD unicode = 0xFEFF; 
 							file.SeekToBegin();
 							file.Write(&unicode,2); 
 							file.SeekToEnd();
 							file.Write(qLog.GetBuffer(qsql.GetLength()),qLog.GetLength()*sizeof(TCHAR));
-							file.Close();
+							file.Close();*/
 							
 							if(!ctj->db->Execute(qsql)){
 								CString error = ctj->db->getErrorMsg();
