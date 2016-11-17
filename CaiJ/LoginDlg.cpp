@@ -51,7 +51,12 @@ void CLoginDlg::OnBnClickedOk()
 	strParams.Format(L"username=%s&passwd=%s&langx=zh-cn&auto=CBCCCI&blackbox=undefined",
 		user,passwd);
 	HttpClient *hc = new HttpClient();
-	CString response = hc->GetHttpCode(login_url,METHOD_POST,strParams);
+	if(!hc->GetHttpCode(login_url,METHOD_POST,strParams))
+	{
+		AfxMessageBox(L"ÍøÂçÁ¬½Ó²»Õý³£");
+		return;
+	}
+	CString response = hc->GetHtml();
 	CString uid = Helper::ExtraUid(response);
 	long uidLen = uid.GetLength();
 	delete hc;
@@ -65,7 +70,7 @@ void CLoginDlg::OnBnClickedOk()
 	}
 	else
 	{
-		AfxMessageBox(L"µÇÂ½Ê§°Ü");
+		AfxMessageBox(L"µÇÂ½Ê§°Ü:"+response);
 	}
 	UpdateData(FALSE);
 }

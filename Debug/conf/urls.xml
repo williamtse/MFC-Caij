@@ -5,7 +5,7 @@
     <STYPE>FT</STYPE>
     <RTYPE>r</RTYPE>
     <NAME>足球-赛事-让球</NAME>
-    <FUTURE>N</FUTURE>
+    <FUTURE>Y</FUTURE>
     <FLUSH_TIME>180</FLUSH_TIME>
   </URL>
   

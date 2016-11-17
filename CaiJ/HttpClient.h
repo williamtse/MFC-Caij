@@ -26,11 +26,12 @@ protected:
 public:
     BOOL OnInitSession(CInternetSession &session);//判断链接是否成功。可以不要
     
-    CString GetHttpCode(CString &url,int strMethod,CString strParams); //主要接口，输入网址，获取代码
+    bool GetHttpCode(CString &url,int strMethod,CString strParams); //主要接口，输入网址，获取代码
     
     int OnProcessError(int dwRetcode, CInternetSession &session,
                 CHttpConnection *pServer, CHttpFile *pFile);//链接错误函数
 	bool CheckNetIsOk();
+	CString GetHtml();
 public:
 	CString        m_strError;  //接受错误信息
 

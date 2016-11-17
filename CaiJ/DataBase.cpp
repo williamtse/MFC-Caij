@@ -22,12 +22,12 @@ bool DataBase::init()
 	GetPrivateProfileString(L"DataBase",L"port",dbport,dbport.GetBuffer(MAX_PATH),MAX_PATH,INIPATH);
 	GetPrivateProfileString(L"DataBase",L"charset",dbcharset,dbcharset.GetBuffer(MAX_PATH),MAX_PATH,INIPATH);
 
-	host = Helper::CTCC(dbhost);
-	user = Helper::CTCC(dbuser);
-	password = Helper::CTCC(dbpasswd);
-	database = Helper::CTCC(dbname);
-	port = atoi(Helper::CTCC(dbport));
-	charset = Helper::CTCC(L"set names "+dbcharset);
+	host = dbhost;
+	user = dbuser;
+	password = dbpasswd;
+	database = dbname;
+	port = _ttoi(dbport);
+	charset = L"set names "+dbcharset;
 
 	dbuser.ReleaseBuffer();
 	dbpasswd.ReleaseBuffer();
@@ -43,7 +43,14 @@ bool DataBase::Connect()
 {
 	MYSQL m_sqlCon;
 	mysql_init(&m_sqlCon);
-	if(!mysql_real_connect(&m_sqlCon,host,user,password,database,port,NULL,0))
+	if(!mysql_real_connect(&m_sqlCon,
+		Helper::CTCC(host),
+		Helper::CTCC(user),
+		Helper::CTCC(password),
+		Helper::CTCC(database),
+		port,
+		NULL,
+		0))
 	{
 		const char *err = mysql_error(&m_sqlCon);
 		CString cerr(err);
@@ -52,7 +59,7 @@ bool DataBase::Connect()
 	}
 	else
 	{
-		mysql_query(&m_sqlCon,charset);
+		mysql_query(&m_sqlCon,Helper::CTCC(charset));
 		handler = m_sqlCon;
 		return TRUE;
 	}

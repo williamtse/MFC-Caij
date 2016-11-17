@@ -26,7 +26,7 @@ struct URLPARAMS
 class Url
 {
 public:
-	Url(LPVOID urlParams);
+	Url();
 	~Url(void);
 	CString GenerateUrl();
 public:
@@ -36,4 +36,5 @@ public:
 	CString stype;
 	CString rtype;
 	bool is_future;
+	void init(LPVOID urlParams);
 };

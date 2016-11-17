@@ -43,6 +43,7 @@ public:
 	CString m_log;
 	CLoginDlg m_loginDlg;
 	CSettingDlg m_settingDlg;
+	int getSTYPE(CString stype);
 protected:
 	virtual void OnOK();
 	
@@ -53,6 +54,10 @@ public:
 	CString m_xml;
 	bool DbConnected;
 	afx_msg void OnSetting();
+	HttpClient http;
+	Query query;
+	Url url;
+	DataBase db;
 };
 
 
@@ -64,10 +69,7 @@ typedef struct {
 	CString url;
 	int count;
 	int flush;
-	CListCtrl* clist;
-	CEdit* clog;
 	int row;
-	CListBox* cresult;
-	DataBase* db;
+	CCaiJDlg* cjDlg;
 }CAIJI_TASK;
 

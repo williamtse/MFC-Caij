@@ -102,23 +102,28 @@ char* Helper::UnicodeToUtf8(CString unicode)
     WideCharToMultiByte (CP_UTF8, 0, (LPCWSTR)unicode, -1, szUtf8, len, NULL,NULL);  
     return szUtf8;  
 }  
-
+void wcharTochar(const wchar_t *wchar, char *chr, int length)  
+{  
+    WideCharToMultiByte( CP_ACP, 0, wchar, -1,  
+        chr, length, NULL, NULL );  
+}  
 //CString×ªconst char*
-const char * Helper::CTCC(CString cstr){
-	CString str = cstr;
-	char szStr[256] = {0};
-	wcstombs(szStr, str, str.GetLength());//Unicode×ª»»ÎªASCII
-	const char * p = szStr;
-	return p;
+const char * Helper::CTCC(CString theString){
+	int    sizeOfString = (theString.GetLength() + 1); 
+	LPTSTR  lpsz = new TCHAR[ sizeOfString ]; 
+	_tcscpy_s(lpsz, sizeOfString, theString);
+	char *chr = new char[sizeOfString];
+	wcharTochar(lpsz, chr, sizeOfString);  
+	return chr;
 }
 
 CString Helper::GetWorkDir() 
 {  
 	CString strExePath;  
- GetModuleFileName(NULL, strExePath.GetBuffer(MAX_PATH), MAX_PATH);  
- strExePath.ReleaseBuffer();  
- strExePath = strExePath.Left(strExePath.ReverseFind(_T('\\')));  
- return strExePath;  
+	 GetModuleFileName(NULL, strExePath.GetBuffer(MAX_PATH), MAX_PATH);  
+	 strExePath.ReleaseBuffer();  
+	 strExePath = strExePath.Left(strExePath.ReverseFind(_T('\\')));  
+	 return strExePath;  
 }
 
 CString Helper::ExtraUid(CString html)

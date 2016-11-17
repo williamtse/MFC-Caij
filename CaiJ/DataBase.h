@@ -21,11 +21,11 @@ public:
 
 protected:
 	MYSQL handler;
-	const char * host;
-	const char * user;
-	const char * password;
-	const char * database;
+	CString host;
+	CString user;
+	CString password;
+	CString database;
 	UINT port;
-	const char * charset;
+	CString charset;
 	CString errorMsg;
 };

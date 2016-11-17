@@ -1,19 +1,23 @@
 #include "StdAfx.h"
 #include "Url.h"
 
-Url::Url(LPVOID urlParams)
+Url::Url(void)
 {
-    URLPARAMS *up = (URLPARAMS *)urlParams;
+}
+
+Url::~Url(void)
+{
+}
+
+void Url::init(LPVOID urlParams)
+{
+	URLPARAMS *up = (URLPARAMS *)urlParams;
 	type = up->type;
 	sport = up->sport;
 	uid = up->uid;
 	stype = up->stype;
 	rtype = up->rtype;
 	is_future = up->is_future;
-}
-
-Url::~Url(void)
-{
 }
 
 CString Url::GenerateUrl(){

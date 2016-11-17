@@ -36,7 +36,7 @@ bool HttpClient::CheckNetIsOk()
 }
 //主要接口，输入网址，获取代码
 //默认为GET请求，不带参数
-CString HttpClient::GetHttpCode(CString &url,int strMethod=METHOD_GET,CString strParams=NULL)
+bool HttpClient::GetHttpCode(CString &url,int strMethod=METHOD_GET,CString strParams=NULL)
 {
 	
 	m_HttpCode.Empty();
@@ -63,12 +63,12 @@ CString HttpClient::GetHttpCode(CString &url,int strMethod=METHOD_GET,CString st
     {
         if (!OnInitSession(session)) //判断链接是否成功；可以不要
         {
-            return NULL;
+            return FALSE;
         }
         if (!AfxParseURL(url, dwServiceType, strServerName, strObject, nPort) || dwServiceType != INTERNET_SERVICE_HTTP)
         {
             m_strError = _T("非法的URL");
-            return NULL;
+            return FALSE;
         }
 
         pServer = session.GetHttpConnection(strServerName, nPort);
@@ -77,7 +77,7 @@ CString HttpClient::GetHttpCode(CString &url,int strMethod=METHOD_GET,CString st
         if (pServer == NULL)
         {
             m_strError = _T("无法与服务器建立连接");
-            return NULL;
+            return FALSE;
         }
         //下面第一个可以为1  打开http链接
 		switch(strMethod){
@@ -97,7 +97,7 @@ CString HttpClient::GetHttpCode(CString &url,int strMethod=METHOD_GET,CString st
         if (htmlFile == NULL)
         {
             m_strError = _T("无法与服务器建立连接");
-            return NULL;
+            return FALSE;
         }
 
       
@@ -106,7 +106,7 @@ CString HttpClient::GetHttpCode(CString &url,int strMethod=METHOD_GET,CString st
         if (!htmlFile->QueryInfoStatusCode(dwRetcode))
         {
             m_strError = _T("网络错误－无法查询反馈代码");
-            return NULL;
+            return FALSE;
         }
 
         if (dwRetcode >= 200 && dwRetcode < 300)
@@ -135,8 +135,8 @@ CString HttpClient::GetHttpCode(CString &url,int strMethod=METHOD_GET,CString st
                 htmlFile->Close();
                 session.Close();
                 delete htmlFile;             
-                
-                return m_HttpCode;
+                return TRUE;
+                //return m_HttpCode;
 
             }
             catch (CInternetException* pEx)
@@ -145,9 +145,10 @@ CString HttpClient::GetHttpCode(CString &url,int strMethod=METHOD_GET,CString st
                 pEx->Delete();
 
                 //因为是CString,所以返回NULL，而不是0；
-                return NULL;
+                return FALSE;
             }
-            return StrContent;
+            //return StrContent;
+			return TRUE;
 
         }
         else
@@ -158,7 +159,7 @@ CString HttpClient::GetHttpCode(CString &url,int strMethod=METHOD_GET,CString st
             //发送错误。
             OnProcessError(dwRetcode, session, pServer, htmlFile);
 
-            return NULL;
+            return FALSE;
         }
 
     }
@@ -167,12 +168,16 @@ CString HttpClient::GetHttpCode(CString &url,int strMethod=METHOD_GET,CString st
         m_strError = _T("网络错误");
 
         pEx->Delete();
-        return NULL;
+        return FALSE;
     }
 
-    return NULL;
+    return FALSE;
 }
 
+CString HttpClient::GetHtml()
+{
+	return m_HttpCode;
+}
 
 //判断链接是否成功。可以不要
 BOOL HttpClient::OnInitSession(CInternetSession &session)

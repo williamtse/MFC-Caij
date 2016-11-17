@@ -61,4 +61,4 @@
 #define IP_ADDR L"http://66.133.81.155"
 #define BASE_DIR Helper::GetWorkDir()
 
-#define INIPATH BASE_DIR+L"\\Caij.ini"
+#define INIPATH BASE_DIR+L"\\conf\\Caij.ini"
