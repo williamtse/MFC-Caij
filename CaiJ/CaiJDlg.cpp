@@ -119,6 +119,16 @@ BOOL CCaiJDlg::OnInitDialog()
 	DbConnected = FALSE;
 	GetDlgItem(IDC_BTN_STOP)->EnableWindow(FALSE);
 
+	ShowLoginDlg();
+	
+	//初始化数据库连接
+	db.init();
+	
+	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
+}
+
+void CCaiJDlg::ShowLoginDlg()
+{
 	INT_PTR nResponse = m_loginDlg.DoModal();
 	if( nResponse != IDOK)  
 	{  
@@ -127,17 +137,9 @@ BOOL CCaiJDlg::OnInitDialog()
 	else
 	{
 		m_uid = m_loginDlg.m_uid;
+		SwitchBtn(TRUE,FALSE);
 		UpdateData(FALSE);
 	}
-	
-	//初始化数据库连接
-	db.init();
-	if(!db.Connect())
-	{
-		AfxMessageBox(db.getErrorMsg());
-	}
-	
-	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
 void CCaiJDlg::OnSysCommand(UINT nID, LPARAM lParam)
@@ -191,34 +193,43 @@ HCURSOR CCaiJDlg::OnQueryDragIcon()
 
 //采集线程函数
 UINT CaijiThreadFunction(LPVOID pParam){
+	Query *query = new Query;
 	CAIJI_TASK *ctj = (CAIJI_TASK *)pParam;
+	
 	int t=0;
-	CString st,matchCount,html,ohtml;
+	CString st=L"0";
+	CString matchCount=L"0";
+	CString html=L" ";
+	CString gameHead=L" ";
 	CString url = ctj->url;
+	CStringArray gameHeadArr,matches;
+
 	while(keep){
 		if(t==0){
-			if(!ctj->cjDlg->http.GetHttpCode(url,METHOD_GET,NULL))
+			try
 			{
-				//AfxMessageBox(ctj->cjDlg->http.m_strError);
+				html = Helper::GetHttpFileData(url);
+			}
+			catch(CInternetException *pEx)
+			{
+				pEx->Delete();
+				ctj->logList->AddString(L"请求错误："+url);
 				delete ctj;
 				return 0;
 			}
-			html = ctj->cjDlg->http.GetHtml();
 			Helper::FiltKG(html);
-			//解析提取数据
-			CStringArray matches;
-			ctj->cjDlg->query.queryBodyVar(html,matches);
+		//	//解析提取数据
+			query->queryBodyVar(html,matches);
 			
 			int matchLen = matches.GetCount();
 			CString matchLenStr;
 			
 			if(matchLen>0){
-				CString gameHead = ctj->cjDlg->query.getHeaderStr(html);
-				CStringArray gameHeadArr ;
+				gameHead = query->getHeaderStr(html);
+				
 				Helper::StrExplode(',',gameHead,gameHeadArr);
 				int glen = gameHeadArr.GetCount();
 				
-				CFileException fileException;
 				for(int i=0;i<matchLen;++i)
 				{
 					
@@ -235,48 +246,54 @@ UINT CaijiThreadFunction(LPVOID pParam){
 					//单行分解后
 					if(mlen>0)
 					{
-							int len = mlen>glen?glen:mlen;
-							CString gid = Helper::TrimSQuot(matchRowArr.GetAt(0));
-							CString key=L"",val=L"",set=L"";
-							for(int j=0;j<len;j++)
-							{
-								key = Helper::TrimSQuot(gameHeadArr.GetAt(j));
-								val = Helper::TrimSQuot(matchRowArr.GetAt(j));
-								if(j<8){
-									set.Format(L"`%s`='%s'",key,val);
-									if(j==7) qsql+= set;
-									else qsql+=set+L",";
-								}else{
-									CString valstr;
-									valstr.Format(L"(NULL,'%s','%s','%s','%s')",gid,key,gid+L"#"+key,val);
-									if(j==len-1) dsql+=valstr;
-									else dsql+=valstr+L",";
-								}
+						int len = mlen>glen?glen:mlen;
+						CString gid = Helper::TrimSQuot(matchRowArr.GetAt(0));
+						CString key=L"",val=L"",set=L"";
+						for(int j=0;j<len;j++)
+						{
+							key = Helper::TrimSQuot(gameHeadArr.GetAt(j));
+							val = Helper::TrimSQuot(matchRowArr.GetAt(j));
+							if(j<8){
+								set.Format(L"`%s`='%s'",key,val);
+								if(j==7) qsql+= set;
+								else qsql+=set+L",";
+							}else{
+								CString valstr;
+								valstr.Format(L"(NULL,'%s','%s','%s','%s')",gid,key,gid+L"#"+key,val);
+								if(j==len-1) dsql+=valstr;
+								else dsql+=valstr+L",";
 							}
-							ctj->cjDlg->m_result.AddString(qsql);
-							ctj->cjDlg->m_result.AddString(dsql);
-							CString qLog = qsql+L"\n";
-							CString dLog = dsql+L"\n";
-							
-							if(!ctj->cjDlg->db.Execute(qsql)){
-								CString error = ctj->cjDlg->db.getErrorMsg();
-								AfxMessageBox(error);
-								delete ctj;
-								return 0;
-							}
-							
-							matchLenStr.Format(L"%d",i);
-							ctj->cjDlg->m_list.SetItemText(ctj->row,2,matchLenStr);
+						}
+						//ctj->logList->AddString(qsql);
+						//ctj->logList->AddString(dsql);
+						
+						MYSQL m_sqlCon;
+						mysql_init(&m_sqlCon);
+						mysql_real_connect(&m_sqlCon,//连接mysql
+							ctj->db->GetHost(),
+							ctj->db->GetUser(),
+							ctj->db->GetPassword(),
+							ctj->db->GetDbName(),
+							ctj->db->GetPort(),
+							NULL,
+							0);
+						const char *qstr= Helper::CTCC(qsql);//sql语句字符集转成utf8
+						const char *dstr= Helper::CTCC(dsql);//sql语句字符集转成utf8
+						mysql_query(&m_sqlCon, qstr);//执行sql语句
+						mysql_query(&m_sqlCon, dstr);//执行sql语句
+						mysql_close(&m_sqlCon);//关闭连接
+						
+						matchLenStr.Format(L"%d",i);
+						ctj->threadList->SetItemText(ctj->row,2,matchLenStr);
 					}
 				}
 			}
 			t=ctj->flush;
-			html.Empty();
 		}
 		Sleep(1000);
 		t--;
 		st.Format(_T("%d"), t);
-		ctj->cjDlg->m_list.SetItemText(ctj->row,3,st);//倒计时
+		ctj->threadList->SetItemText(ctj->row,3,st);//倒计时
 	}
 	delete ctj;
 	return 0;
@@ -295,23 +312,13 @@ void CCaiJDlg::SwitchBtn(bool start,bool stop)
 void CCaiJDlg::OnBnClickedButtonStart()
 {
 	SwitchBtn(FALSE,FALSE);
-
-	//检测网络连接
-	//HttpClient *hc = new HttpClient;
-	CString testUrl = IP_ADDR;
-	if(!http.CheckNetIsOk())
-	{
-		AfxMessageBox(http.m_strError);
-		SwitchBtn(TRUE,FALSE);
-		return;
-	}
 	
 	//解析urls.xml
+	m_result.AddString(L"解析urls.xml");
 	CString urlXml = BASE_DIR+L"\\conf\\urls.xml";
 	if(!PathFileExists(urlXml)){
 		AfxMessageBox(L"找不到"+urlXml+L"文件");
-		GetDlgItem(IDC_BUTTON_START)->EnableWindow(TRUE);
-		GetDlgItem(IDC_BTN_STOP)->EnableWindow(FALSE);
+		SwitchBtn(TRUE,FALSE);
 		return;
 	}
 	
@@ -328,8 +335,7 @@ void CCaiJDlg::OnBnClickedButtonStart()
 	if(spDoc->load(CComVariant(urlXml), &vb) != S_OK) //加载XML文件
 	{
 		AfxMessageBox(L"找不到urls.xml文件");
-		GetDlgItem(IDC_BTN_STOP)->EnableWindow(FALSE);
-		GetDlgItem(IDC_BUTTON_START)->EnableWindow(TRUE);
+		SwitchBtn(TRUE,FALSE);
 		return;
 	}
 
@@ -401,12 +407,26 @@ void CCaiJDlg::OnBnClickedButtonStart()
 		CString urlstr = url.GenerateUrl();
 		
 		//提取页数
-		if(!http.GetHttpCode(urlstr,METHOD_GET,NULL))
+		CString htmlData;
+		try
 		{
-			AfxMessageBox(http.m_strError);
+			htmlData = Helper::GetHttpFileData(urlstr);
 		}
-		CString htmlData = http.GetHtml();
+		catch(...)
+		{
+			AfxMessageBox(L"网络请求失败！");
+			SwitchBtn(TRUE,FALSE);
+			return;
+		}
+		int pos = htmlData.Find(L"window.open");
+		if(pos>0)
+		{
+			AfxMessageBox(L"用户在另外一个地方登陆，请重新登陆");
+			ShowLoginDlg();
+			return ;
+		}
 		int pageNum = query.getPageNum(htmlData);
+		//int pageNum = 1;
 		//如果页数大于1，开启多个线程
 		for(int k=0;k<pageNum;k++)
 		{
@@ -414,7 +434,9 @@ void CCaiJDlg::OnBnClickedButtonStart()
 			CAIJI_TASK *cjt = new CAIJI_TASK;//采集任务结构体
 			CString realUrl;
 			realUrl.Format(L"%s&page_no=%d",urlstr,k);
-			cjt->cjDlg = this;
+			cjt->db = &db;
+			cjt->threadList = &m_list;
+			cjt->logList = &m_result;
 			cjt->url=realUrl;
 			cjt->count=0;
 			cjt->name = cjName;

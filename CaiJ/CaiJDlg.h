@@ -44,6 +44,8 @@ public:
 	CLoginDlg m_loginDlg;
 	CSettingDlg m_settingDlg;
 	int getSTYPE(CString stype);
+	void ShowLoginDlg();
+
 protected:
 	virtual void OnOK();
 	
@@ -70,6 +72,8 @@ typedef struct {
 	int count;
 	int flush;
 	int row;
-	CCaiJDlg* cjDlg;
+	DataBase *db;
+	CListCtrl *threadList;
+	CListBox *logList;
 }CAIJI_TASK;
 

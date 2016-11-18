@@ -13,5 +13,7 @@ public:
 	static const char* CTCC(CString cstr);
 	static CString GetWorkDir();
 	static char* Helper::UnicodeToUtf8(CString unicode);
-	static CString Helper::ExtraUid(CString html);
+	static CString ExtraUid(CString html);
+	static CString GetHttpFileData(CString strUrl);
+	static CString Helper::Utf8TUnicode(TCHAR sRecv[1024]);
 };

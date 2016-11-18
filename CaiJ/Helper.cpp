@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "Helper.h"
-
+#include <afxinet.h> //http
 Helper::Helper(void)
 {
 }
@@ -133,4 +133,33 @@ CString Helper::ExtraUid(CString html)
 	int pos2 = r.Find(L"|");
 	CString uid = r.Left(pos2);
 	return uid;
+}
+
+CString Helper::Utf8TUnicode(TCHAR sRecv[1024])
+{
+	int nBufferSize = MultiByteToWideChar(65001, 0, (LPCSTR)sRecv, -1, NULL, 0);
+
+    wchar_t *pBuffer = new wchar_t[nBufferSize + 1];
+    memset(pBuffer, 0, (nBufferSize + 1) *sizeof(wchar_t));
+
+    //gb2312转为unicode,则用CP_ACP  
+    //gbk转为unicode,也用CP_ACP  
+    //utf-8转为unicode,则用CP_UTF8  
+    MultiByteToWideChar(65001, 0, (LPCSTR)sRecv, -1, pBuffer, nBufferSize *sizeof(wchar_t));
+	return pBuffer;
+}
+
+CString Helper::GetHttpFileData(CString strUrl)
+{
+	CInternetSession Session(L"Internet Explorer", 0);
+	CHttpFile *pHttpFile = NULL;
+	CString strData;
+	TCHAR strClip[1024]; 
+	pHttpFile = (CHttpFile*)Session.OpenURL(strUrl);
+    while ( pHttpFile->ReadString(strClip, 1024) )
+    {
+		strData += Utf8TUnicode(strClip);
+	}
+	delete pHttpFile;
+    return strData;
 }

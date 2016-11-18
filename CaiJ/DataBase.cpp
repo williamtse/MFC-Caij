@@ -1,3 +1,4 @@
+//DataBase类只提供数据库配置数据
 #include "StdAfx.h"
 #include "DataBase.h"
 #include "XmlQuery.h"
@@ -5,6 +6,7 @@
 #include "Helper.h"
 DataBase::DataBase(void)
 {
+	
 }
 
 DataBase::~DataBase(void)
@@ -21,7 +23,6 @@ bool DataBase::init()
 	GetPrivateProfileString(L"DataBase",L"dbname",dbname,dbname.GetBuffer(MAX_PATH),MAX_PATH,INIPATH);
 	GetPrivateProfileString(L"DataBase",L"port",dbport,dbport.GetBuffer(MAX_PATH),MAX_PATH,INIPATH);
 	GetPrivateProfileString(L"DataBase",L"charset",dbcharset,dbcharset.GetBuffer(MAX_PATH),MAX_PATH,INIPATH);
-
 	host = dbhost;
 	user = dbuser;
 	password = dbpasswd;
@@ -38,69 +39,27 @@ bool DataBase::init()
 
 	return TRUE;
 }
-
-bool DataBase::Connect()
+const char* DataBase::GetHost()
 {
-	MYSQL m_sqlCon;
-	mysql_init(&m_sqlCon);
-	if(!mysql_real_connect(&m_sqlCon,
-		Helper::CTCC(host),
-		Helper::CTCC(user),
-		Helper::CTCC(password),
-		Helper::CTCC(database),
-		port,
-		NULL,
-		0))
-	{
-		const char *err = mysql_error(&m_sqlCon);
-		CString cerr(err);
-		errorMsg = cerr;
-		return FALSE;
-	}
-	else
-	{
-		mysql_query(&m_sqlCon,Helper::CTCC(charset));
-		handler = m_sqlCon;
-		return TRUE;
-	}
+	return Helper::CTCC(host);
 }
-
-MYSQL DataBase::getDbHandler()
+const char* DataBase::GetUser()
 {
-	return handler;
+	return Helper::CTCC(user);
 }
-
-CString DataBase::getErrorMsg()
+const char* DataBase::GetPassword()
 {
-	return errorMsg;
+	return Helper::CTCC(password);
 }
-
-bool DataBase::Execute(CString sql)
+const char* DataBase::GetCharset()
 {
-	char * pstr= Helper::UnicodeToUtf8(sql);
-	int res = mysql_query(&handler, pstr);
-	delete pstr;
-	if(res!=0){
-		CString errStr;
-		switch(res){
-			case CR_COMMANDS_OUT_OF_SYNC:
-				errStr = L"Commands were executed in an improper order.";
-				break;
-			case CR_SERVER_GONE_ERROR:
-				errStr = L"The MySQL server has gone away.";
-				break;
-			case CR_SERVER_LOST:
-				errStr = L"The connection to the server was lost during the query.";
-				break;
-			case CR_UNKNOWN_ERROR:
-				errStr = L"An unknown error occurred.";
-				break;
-			default:
-				errStr = L"mysql语句执行错误";
-				break;
-		}
-		errorMsg = errStr;
-		return FALSE;
-	}
-	return TRUE;
+	return Helper::CTCC(charset);
+}
+const char* DataBase::GetDbName()
+{
+	return Helper::CTCC(database);
+}
+UINT DataBase::GetPort()
+{
+	return port;
 }

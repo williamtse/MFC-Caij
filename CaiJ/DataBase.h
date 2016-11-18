@@ -13,19 +13,19 @@ protected:
 	
 public:
 	bool init();
-	int query(const char * sql);
-	bool Connect();
-	CString getErrorMsg();
-	MYSQL getDbHandler();
-	bool Execute(CString sql);
+	MYSQL Connect();
+	const char* GetHost();
+	const char* GetUser();
+	const char* GetPassword();
+	const char* GetCharset();
+	const char* GetDbName();
+	UINT GetPort();
 
 protected:
-	MYSQL handler;
 	CString host;
 	CString user;
 	CString password;
 	CString database;
 	UINT port;
 	CString charset;
-	CString errorMsg;
 };

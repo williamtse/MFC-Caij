@@ -22,9 +22,9 @@ bool HttpClient::CheckNetIsOk()
 	CInternetSession session(NULL, 0); 
 	CInternetFile *file;
 	try{
-		session.SetOption(INTERNET_OPTION_CONNECT_TIMEOUT, 60000); // 3秒的连接超时
-		session.SetOption(INTERNET_OPTION_DATA_RECEIVE_TIMEOUT ,30000);//3秒接收超时
-		session.SetOption(INTERNET_OPTION_DATA_SEND_TIMEOUT  ,30000);//3秒接收超时
+		session.SetOption(INTERNET_OPTION_CONNECT_TIMEOUT, 100000); // 3秒的连接超时
+		session.SetOption(INTERNET_OPTION_DATA_RECEIVE_TIMEOUT ,100000);//3秒接收超时
+		session.SetOption(INTERNET_OPTION_DATA_SEND_TIMEOUT  ,100000);//3秒接收超时
 		 session.SetOption(INTERNET_OPTION_CONNECT_RETRIES, 2);
 		file=(CInternetFile*)session.OpenURL(SITE,1,INTERNET_FLAG_TRANSFER_BINARY|INTERNET_FLAG_RELOAD);
 	}catch(CInternetException* m_pException){
@@ -59,8 +59,6 @@ bool HttpClient::GetHttpCode(CString &url,int strMethod=METHOD_GET,CString strPa
 
 	CString headerCT = _T("Content-Type: application/x-www-form-urlencoded"); // 请求头
 
-    try
-    {
         if (!OnInitSession(session)) //判断链接是否成功；可以不要
         {
             return FALSE;
@@ -111,10 +109,6 @@ bool HttpClient::GetHttpCode(CString &url,int strMethod=METHOD_GET,CString strPa
 
         if (dwRetcode >= 200 && dwRetcode < 300)
         {
-            try
-            {
-                
-				
                 while (htmlFile->ReadString(sRecv, 1024))
                 {
                     int nBufferSize = MultiByteToWideChar(PageCode, 0, (LPCSTR)sRecv, -1, NULL, 0);
@@ -137,19 +131,6 @@ bool HttpClient::GetHttpCode(CString &url,int strMethod=METHOD_GET,CString strPa
                 delete htmlFile;             
                 return TRUE;
                 //return m_HttpCode;
-
-            }
-            catch (CInternetException* pEx)
-            {
-                m_strError = _T("接收数据错误");
-                pEx->Delete();
-
-                //因为是CString,所以返回NULL，而不是0；
-                return FALSE;
-            }
-            //return StrContent;
-			return TRUE;
-
         }
         else
         {
@@ -158,19 +139,11 @@ bool HttpClient::GetHttpCode(CString &url,int strMethod=METHOD_GET,CString strPa
 
             //发送错误。
             OnProcessError(dwRetcode, session, pServer, htmlFile);
-
+			delete htmlFile;
             return FALSE;
         }
 
-    }
-    catch (CInternetException* pEx)
-    {
-        m_strError = _T("网络错误");
-
-        pEx->Delete();
-        return FALSE;
-    }
-
+	delete htmlFile;
     return FALSE;
 }
 
