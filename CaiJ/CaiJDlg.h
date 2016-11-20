@@ -40,7 +40,6 @@ public:
 	CListCtrl m_list;
 	CString m_uid;
 	afx_msg void OnBnClickedButtonStart();
-	CString m_log;
 	CLoginDlg m_loginDlg;
 	CSettingDlg m_settingDlg;
 	int getSTYPE(CString stype);
@@ -52,7 +51,6 @@ protected:
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg void OnBnClickedBtnStop();
-	CListBox m_result;
 	CString m_xml;
 	bool DbConnected;
 	afx_msg void OnSetting();
@@ -60,6 +58,14 @@ public:
 	Query query;
 	Url url;
 	DataBase db;
+	CString m_strLog;
+	bool CheckDbConnect();
+	CString log_dir;
+	bool hasCheckNet;
+	CString s_progress;
+	CProgressCtrl c_progress;
+	CStatic c_static_pro;
+	UINT taskCount;
 };
 
 
@@ -74,6 +80,10 @@ typedef struct {
 	int row;
 	DataBase *db;
 	CListCtrl *threadList;
-	CListBox *logList;
+	CString logDir;
+	CProgressCtrl *pro;
+	CStatic *proText;
+	CCaiJDlg *dlg;
+	UINT taskCount;
 }CAIJI_TASK;
 

@@ -34,6 +34,9 @@
 #define IDC_DBNAME                      1019
 #define IDC_DBUSER                      1020
 #define IDC_DBPASSWD                    1021
+#define IDC_SCROLLBAR1                  1022
+#define IDC_PROGRESS1                   1023
+#define IDC_PG_TEXT                     1024
 #define ID_32771                        32771
 #define MENU_SETTING                    32772
 
@@ -43,7 +46,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        134
 #define _APS_NEXT_COMMAND_VALUE         32773
-#define _APS_NEXT_CONTROL_VALUE         1022
+#define _APS_NEXT_CONTROL_VALUE         1025
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

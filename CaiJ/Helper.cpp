@@ -109,7 +109,7 @@ void wcharTochar(const wchar_t *wchar, char *chr, int length)
 }  
 //CStringתconst char*
 const char * Helper::CTCC(CString theString){
-	int    sizeOfString = (theString.GetLength() + 1); 
+	int    sizeOfString = (theString.GetLength() + 1)*2; 
 	LPTSTR  lpsz = new TCHAR[ sizeOfString ]; 
 	_tcscpy_s(lpsz, sizeOfString, theString);
 	char *chr = new char[sizeOfString];
@@ -149,6 +149,31 @@ CString Helper::Utf8TUnicode(TCHAR sRecv[1024])
 	return pBuffer;
 }
 
+const char* Helper::CStringTUtf8(CString strValue)
+{
+	char *buffer = NULL;  
+    int  length;  
+  
+	length = WideCharToMultiByte(CP_UTF8, 0, strValue, -1, NULL, 0, NULL, NULL);  
+
+	if (length <= 0)  
+	{  
+		return NULL;  
+	}  
+  
+	buffer = new char[length];  
+	if (buffer == NULL)  
+	{  
+		return NULL;  
+	}  
+  
+	ZeroMemory(buffer, length);  
+  
+	WideCharToMultiByte(CP_UTF8, 0, strValue, -1, buffer, length, NULL, NULL);  
+  
+    return buffer; 
+}
+
 CString Helper::GetHttpFileData(CString strUrl)
 {
 	CInternetSession Session(L"Internet Explorer", 0);
@@ -161,5 +186,8 @@ CString Helper::GetHttpFileData(CString strUrl)
 		strData += Utf8TUnicode(strClip);
 	}
 	delete pHttpFile;
+	FiltKG(strData);
     return strData;
 }
+
+
